@@ -88,6 +88,11 @@ namespace HttpServer.Logging
             return ret;
         }
 
+        public Message WithDate()
+        {
+            return this.With(LogField.CURRENT_DATE_UTC, DateTime.UtcNow);
+        }
+
         public override string ToString()
         {
             string title = string.IsNullOrEmpty(Title)

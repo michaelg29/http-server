@@ -9,7 +9,7 @@ namespace HttpServer.Logging
     public interface ILogger
     {
         void Send(string message);
-        void Send(IDictionary<string, object> headers);
+        void Send(IDictionary<string, object> headers, Func<object, string> decoder = null);
         void Send(Exception e);
         void Send(Message message);
     }

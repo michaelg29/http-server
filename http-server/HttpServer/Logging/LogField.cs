@@ -12,5 +12,6 @@ namespace HttpServer.Logging
         public const string EXCEPTION_MSG = "exception_msg";
         public const string INNER_EXCEPTION_TYPE = "inner_exception_type";
         public const string INNER_EXCEPTION_MSG = "inner_exception_msg";
+        public const string CURRENT_DATE_UTC = "current_date_utc";
     }
 }

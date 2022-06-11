@@ -19,7 +19,12 @@ namespace HttpServer.Test
                 .With(new ArithmeticException("test arithmetic"))
                 .With(TestEnum.TestEnum1)
                 .With("header1", "value1");
-            Console.WriteLine(m.ToString());
+
+            Logger.ConsoleLogger.Send(m);
+            Logger.ConsoleLogger.Send(m);
+
+            ILogger logger = new FileLogger("test.txt", true);
+            logger.Send(m);
 
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
