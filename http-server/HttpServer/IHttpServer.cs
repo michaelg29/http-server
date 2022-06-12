@@ -56,7 +56,7 @@ namespace HttpServer
         /// </summary>
         /// <param name="content">String content</param>
         /// <param name="args">Formatting arguments</param>
-        Task SendStringAsync(string content, params string[] args);
+        Task SendStringAsync(string content, string contentType, params string[] args);
 
         /// <summary>
         /// Run the server

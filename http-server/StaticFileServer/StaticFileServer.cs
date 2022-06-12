@@ -232,11 +232,11 @@ namespace StaticFileServer
         /// <returns></returns>
         private async Task ReadFormattedFileToResponseAsync(string filePath, params string[] args)
         {
-            await SendStringAsync(File.ReadAllText(filePath), args);
+            await SendStringAsync(File.ReadAllText(filePath), Mime.GetMimeType(filePath), args);
         }
 
         /// <inheritdoc />
-        public async Task SendStringAsync(string content, params string[] args)
+        public async Task SendStringAsync(string content, string contentType, params string[] args)
         {
             // flush existing stream
             await ctx.Response.OutputStream.FlushAsync();
@@ -259,7 +259,7 @@ namespace StaticFileServer
 
             // set header values
             ContentLength = content.Length;
-            FileExt = ".txt";
+            if (contentType != null) ContentType = contentType;
             Encoding = Encoding.UTF8;
 
             // send bytes
