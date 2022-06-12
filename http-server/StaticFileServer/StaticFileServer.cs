@@ -298,13 +298,17 @@ namespace StaticFileServer
 
             // get absolute path for file access
             string absolutePath = AbsolutePath(route);
+            if (absolutePath.Contains(".."))
+            {
+                absolutePath = null;
+            }
 
-            if (File.Exists(absolutePath))
+            if (absolutePath != null && File.Exists(absolutePath))
             {
                 // physical file exists
                 await _SendFileAsync(absolutePath);
             }
-            else if (Directory.Exists(absolutePath))
+            else if (absolutePath != null && Directory.Exists(absolutePath))
             {
                 // list directory contents to user
                 string directoryList = string.Empty;
