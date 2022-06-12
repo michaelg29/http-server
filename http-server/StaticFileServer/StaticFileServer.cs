@@ -287,7 +287,7 @@ namespace StaticFileServer
         private async Task ProcessRequest()
         {
             // store route locally
-            string route = ctx.Request.Url.AbsolutePath;
+            string route = Uri.UnescapeDataString(ctx.Request.Url.AbsolutePath);
             if (route == "/shutdown")
             {
                 // shutdown server
