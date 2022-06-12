@@ -232,26 +232,34 @@ namespace StaticFileServer
         /// <returns></returns>
         private async Task ReadFormattedFileToResponseAsync(string filePath, params string[] args)
         {
+            await SendStringAsync(File.ReadAllText(filePath), args);
+        }
+
+        /// <inheritdoc />
+        public async Task SendStringAsync(string content, params string[] args)
+        {
             // flush existing stream
             await ctx.Response.OutputStream.FlushAsync();
 
             // read file contents
-            string content = File.ReadAllText(filePath);
-            try
+            if (args.Count() > 0)
             {
-                // apply formatting to the string
-                string formatted = string.Format(content, args);
-                content = formatted;
-            }
-            catch (Exception e)
-            {
-                logger.Send(new Message("Failed to format file")
-                    .With(e));
+                try
+                {
+                    // apply formatting to the string
+                    string formatted = string.Format(content, args);
+                    content = formatted;
+                }
+                catch (Exception e)
+                {
+                    logger.Send(new Message("Failed to format file")
+                        .With(e));
+                }
             }
 
             // set header values
             ContentLength = content.Length;
-            FileExt = filePath;
+            FileExt = ".txt";
             Encoding = Encoding.UTF8;
 
             // send bytes

@@ -48,13 +48,20 @@ namespace HttpServer
         /// Send a file to the current response
         /// </summary>
         /// <param name="filePath">File path</param>
-        /// <param name="args"></param>
+        /// <param name="args">Formatting arguments</param>
         Task SendFileAsync(string filePath, params string[] args);
+
+        /// <summary>
+        /// Send string content
+        /// </summary>
+        /// <param name="content">String content</param>
+        /// <param name="args">Formatting arguments</param>
+        Task SendStringAsync(string content, params string[] args);
 
         /// <summary>
         /// Run the server
         /// </summary>
-        /// <param name="args">input arguments</param>
+        /// <param name="args">Input arguments</param>
         /// <returns>Exit code</returns>
         Task<int> RunAsync(string[] args);
     }
