@@ -67,8 +67,8 @@ namespace HttpServer.Logging
 
             headers.Add(new KeyValuePair<string, string>(
                 header,
-                decoder == null
-                    ? value.ToString()
+                decoder == null || value == null
+                    ? value?.ToString()
                     : decoder(value)));
             
             return this;
@@ -95,9 +95,15 @@ namespace HttpServer.Logging
 
         public override string ToString()
         {
+            if (headers == null)
+            {
+                return Title;
+            }
+
             string title = string.IsNullOrEmpty(Title)
                 ? string.Empty
                 : Title + Environment.NewLine;
+            
             return title + string.Join(Environment.NewLine, headers.Select(header =>
                 string.IsNullOrEmpty(header.Key)
                     ? header.Value
