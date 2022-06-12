@@ -1,5 +1,5 @@
 
 http-server/.vs
-bin
+http-server/*/bin
 obj
 *.csproj.user
