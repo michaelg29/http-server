@@ -13,8 +13,8 @@ namespace StaticFileServer
         {
             Console.WriteLine("Hello, world!");
 
-            string hostUrl = "http://127.0.0.1:5500/";
-            string hostDir = "view";
+            string hostUrl = "http://+:8080/";
+            string hostDir = string.Empty;
 
             for (int i = 0; i < args.Length; i++)
             {

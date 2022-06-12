@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -42,6 +43,16 @@ namespace StaticFileServer
         private string errorPath = "error.html";
         private string notFoundPath = "notFound.html";
         private string dirPath = "directory.html";
+
+        /// <summary>
+        /// Construct an absolute path for template files
+        /// </summary>
+        /// <param name="path">Template file path</param>
+        /// <returns>The absolute path</returns>
+        private string GetTemplatePath(string path)
+        {
+            return $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{path}";
+        }
 
         /// <summary>
         /// If the server is running
@@ -139,10 +150,12 @@ namespace StaticFileServer
         /// <param name="hostUrl">URL to host from</param>
         /// <param name="hostDir">Directory to fetch content from</param>
         /// <param name="logger">Logger instance, defaults to console logger</param>
-        public StaticFileServer(string hostUrl, string hostDir, ILogger logger = null)
+        public StaticFileServer(string hostUrl = null, string hostDir = null, ILogger logger = null)
         {
-            this.hostUrl = hostUrl;
-            this.hostDir = hostDir.TrimEnd('/');
+            this.hostUrl = hostUrl ?? "http://+:8080";
+            this.hostDir = string.IsNullOrEmpty(hostDir)
+                ? Directory.GetCurrentDirectory()
+                : hostDir.TrimEnd('/');
             this.logger = logger ?? Logger.ConsoleLogger;
         }
 
@@ -186,7 +199,7 @@ namespace StaticFileServer
                 // General exception, send to user
                 ResponseCode = HttpStatusCode.InternalServerError;
                 logger.Send(e);
-                await ReadFormattedFileToResponseAsync(errorPath,
+                await ReadFormattedFileToResponseAsync(GetTemplatePath(errorPath),
                     e.GetType().ToString(), e.Message);
             }
         }
@@ -329,14 +342,14 @@ namespace StaticFileServer
                     }));
 
                 // send formatted file
-                await _SendFileAsync(dirPath,
+                await _SendFileAsync(GetTemplatePath(dirPath),
                     route, directoryList, fileList);
             }
             else
             {
                 // send 404 file
                 ResponseCode = HttpStatusCode.NotFound;
-                await _SendFileAsync(notFoundPath);
+                await _SendFileAsync(GetTemplatePath(notFoundPath));
             }
         }
 
