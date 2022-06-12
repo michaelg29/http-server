@@ -2,3 +2,4 @@
 http-server/.vs
 bin
 obj
+*.csproj.user
