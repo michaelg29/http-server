@@ -23,7 +23,6 @@ namespace StaticFileServer
         private string errorPath = "error.html";
         private string notFoundPath = "notFound.html";
         private string dirPath = "directory.html";
-        private string shutdownPath = "shutdown.html";
 
         private bool running = false;
         private HttpListener listener = null;
