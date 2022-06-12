@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace HttpServer.Logging
 {
+    /// <summary>
+    /// Static fields to be used as Message header keys
+    /// </summary>
     public static class LogField
     {
         public const string EXCEPTION_TYPE = "exception_type";

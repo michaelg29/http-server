@@ -9,31 +9,69 @@ using System.Threading.Tasks;
 
 namespace StaticFileServer
 {
+    /// <summary>
+    /// Server class to host files from a directory
+    /// </summary>
     public class StaticFileServer : IHttpServer
     {
+        /// <summary>
+        /// Url hosting from
+        /// </summary>
         private string hostUrl;
+
+        /// <summary>
+        /// Directory the server is fetching contents from
+        /// </summary>
         private string hostDir;
+
+        /// <summary>
+        /// Construct an absolute path for a route
+        /// </summary>
+        /// <param name="route">The route</param>
+        /// <returns>The absolute path</returns>
         private string AbsolutePath(string route)
         {
-            return (route.StartsWith("/") || hostDir.EndsWith("/"))
+            return route.StartsWith("/")
                 ? $"{hostDir}{route}"
                 : $"{hostDir}/{route}";
         }
 
+        /// <summary>
+        /// HTML template file paths
+        /// </summary>
         private string errorPath = "error.html";
         private string notFoundPath = "notFound.html";
         private string dirPath = "directory.html";
 
+        /// <summary>
+        /// If the server is running
+        /// </summary>
         private bool running = false;
+
+        /// <summary>
+        /// Listener object for the server
+        /// </summary>
         private HttpListener listener = null;
+
+        /// <summary>
+        /// Context of the current request and response
+        /// </summary>
         private HttpListenerContext ctx = null;
+
+        /// <summary>
+        /// Logger object
+        /// </summary>
         private ILogger logger = null;
 
+        /// <summary>
+        /// Get the current request object
+        /// </summary>
         public HttpListenerRequest Request
         {
             get => ctx.Request;
         }
 
+        /// <inheritdoc />
         public HttpStatusCode ResponseCode
         {
             set
@@ -45,6 +83,7 @@ namespace StaticFileServer
             }
         }
 
+        /// <inheritdoc />
         public long ContentLength
         {
             set
@@ -56,6 +95,7 @@ namespace StaticFileServer
             }
         }
 
+        /// <inheritdoc />
         public string ContentType
         {
             set
@@ -67,6 +107,7 @@ namespace StaticFileServer
             }
         }
 
+        /// <inheritdoc />
         public Encoding Encoding
         {
             set
@@ -78,6 +119,9 @@ namespace StaticFileServer
             }
         }
 
+        /// <summary>
+        /// Set the file corresponding MIME type
+        /// </summary>
         public string FileExt
         {
             set
@@ -89,22 +133,39 @@ namespace StaticFileServer
             }
         }
 
-        public StaticFileServer(string hostUrl, string hostDir, ILogger logger)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="hostUrl">URL to host from</param>
+        /// <param name="hostDir">Directory to fetch content from</param>
+        /// <param name="logger">Logger instance, defaults to console logger</param>
+        public StaticFileServer(string hostUrl, string hostDir, ILogger logger = null)
         {
             this.hostUrl = hostUrl;
-            this.hostDir = hostDir;
-            this.logger = logger;
+            this.hostDir = hostDir.TrimEnd('/');
+            this.logger = logger ?? Logger.ConsoleLogger;
         }
 
-        public async Task SendFileAsync(string filePath, params string[] args)
+        /// <summary>
+        /// Send file to the current response
+        /// </summary>
+        /// <param name="relFilePath">File path relative to the host directory</param>
+        /// <param name="args">Formatting arguments</param>
+        public async Task SendFileAsync(string relFilePath, params string[] args)
         {
-            await _SendFileAsync(AbsolutePath(filePath), args);
+            await _SendFileAsync(AbsolutePath(relFilePath), args);
         }
 
+        /// <summary>
+        /// Send file to the current response
+        /// </summary>
+        /// <param name="filePath">Absolute file path</param>
+        /// <param name="args">Formatting arguments</param>
         private async Task _SendFileAsync(string filePath, params string[] args)
         {
             try
             {
+                // determine if we need to format
                 if (args.Count() > 0)
                 {
                     await ReadFormattedFileToResponseAsync(filePath, args);
@@ -116,29 +177,38 @@ namespace StaticFileServer
             }
             catch (HttpListenerException e)
             {
+                // HTTP Exception, cannot send another file
                 ResponseCode = HttpStatusCode.InternalServerError;
-                Console.WriteLine($"HttpException: {e.Message}");
+                logger.Send(e);
             }
             catch (Exception e)
             {
+                // General exception, send to user
                 ResponseCode = HttpStatusCode.InternalServerError;
-                Console.WriteLine($"{e.GetType()}: {e.Message}");
+                logger.Send(e);
                 await ReadFormattedFileToResponseAsync(errorPath,
                     e.GetType().ToString(), e.Message);
             }
         }
 
+        /// <summary>
+        /// Read file stream into response
+        /// </summary>
+        /// <param name="filePath">Absolute path of file</param>
         private async Task ReadFileToResponseAsync(string filePath)
         {
+            // flush existing stream
             await ctx.Response.OutputStream.FlushAsync();
             Stream input = new FileStream(filePath, FileMode.Open);
 
             try
             {
+                // set header values
                 ContentLength = input.Length;
                 FileExt = filePath;
                 Encoding = Encoding.UTF8;
 
+                // read file into blocks and send sequentially
                 byte[] buffer = new byte[65536];
                 int noBytes;
                 while ((noBytes = input.Read(buffer, 0, buffer.Length)) > 0)
@@ -149,52 +219,73 @@ namespace StaticFileServer
             }
             finally
             {
+                // always close the stream
                 input.Close();
             }
         }
 
+        /// <summary>
+        /// Read file into response with formatting
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         private async Task ReadFormattedFileToResponseAsync(string filePath, params string[] args)
         {
+            // flush existing stream
             await ctx.Response.OutputStream.FlushAsync();
 
+            // read file contents
             string content = File.ReadAllText(filePath);
             try
             {
+                // apply formatting to the string
                 string formatted = string.Format(content, args);
                 content = formatted;
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Could not format file: {e.Message}");
+                logger.Send(new Message("Failed to format file")
+                    .With(e));
             }
 
+            // set header values
             ContentLength = content.Length;
             FileExt = filePath;
             Encoding = Encoding.UTF8;
 
+            // send bytes
             byte[] buffer = Encoding.UTF8.GetBytes(content);
             await ctx.Response.OutputStream.WriteAsync(buffer, 0, content.Length);
             await ctx.Response.OutputStream.FlushAsync();
         }
 
+        /// <summary>
+        /// Process current request
+        /// </summary>
         private async Task ProcessRequest()
         {
+            // store route locally
             string route = ctx.Request.Url.AbsolutePath;
             if (route == "/shutdown")
             {
+                // shutdown server
                 running = false;
-                ctx.Response.StatusCode = (int)HttpStatusCode.NoContent;
+                ResponseCode = HttpStatusCode.NoContent;
                 return;
             }
 
+            // get absolute path for file access
             string absolutePath = AbsolutePath(route);
 
             if (File.Exists(absolutePath))
             {
+                // physical file exists
                 await _SendFileAsync(absolutePath);
             }
             else if (Directory.Exists(absolutePath))
             {
+                // list directory contents to user
                 string directoryList = string.Empty;
                 string fileList = string.Empty;
 
@@ -203,6 +294,7 @@ namespace StaticFileServer
                     route += "/";
                 }
 
+                // generate navigatable directory list
                 directoryList = string.Join("", Directory.GetDirectories(absolutePath)
                     .Select(s =>
                     {
@@ -212,12 +304,14 @@ namespace StaticFileServer
                     }));
                 if (route.Length > 1)
                 {
+                    // parent directory link
                     int n = route.Length - 2;
                     int idx = Math.Max(route.LastIndexOf('/', n), route.LastIndexOf('\\', n));
                     string parentPath = route.Substring(0, idx + 1);
                     directoryList += $"\n\t\t<ul><a href=\"{parentPath}\">..</a></ul>";
                 }
 
+                // generate file list
                 fileList = string.Join("", Directory.GetFiles(absolutePath)
                     .Select(s =>
                     {
@@ -226,20 +320,27 @@ namespace StaticFileServer
                         return $"\n\t\t<ul><a href=\"{route}{relPath}\">{relPath}</a></ul>";
                     }));
 
+                // send formatted file
                 await _SendFileAsync(dirPath,
                     route, directoryList, fileList);
             }
             else
             {
-                ctx.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                // send 404 file
+                ResponseCode = HttpStatusCode.NotFound;
                 await _SendFileAsync(notFoundPath);
             }
         }
 
+        /// <summary>
+        /// Receiver for a request
+        /// </summary>
+        /// <param name="result">Async result</param>
         private async void ProcessContextAsync(IAsyncResult result)
         {
             try
             {
+                // get context
                 ctx = this.listener.EndGetContext(result);
 
                 // log the request
@@ -249,6 +350,7 @@ namespace StaticFileServer
                     .With("Host", ctx.Request.UserHostName)
                     .With("Agent", ctx.Request.UserAgent));
 
+                // process and send return
                 await ProcessRequest();
 
                 // log the response
@@ -257,6 +359,7 @@ namespace StaticFileServer
                     .With("Type", ctx.Response.ContentType ?? null)
                     .With("Length", ctx.Response.ContentLength64));
 
+                // close the stream
                 ctx.Response.Close();
                 ctx = null;
 
@@ -280,11 +383,13 @@ namespace StaticFileServer
         {
             if (running)
             {
+                // do not start again
                 return 1;
             }
 
             try
             {
+                // create and bind listener
                 listener = new HttpListener();
                 listener.Prefixes.Add(hostUrl);
                 listener.Start();
@@ -298,10 +403,13 @@ namespace StaticFileServer
             logger.Send($"Listening on {hostUrl}, content from {hostDir}");
             running = true;
 
+            // start receiving thread
             IAsyncResult ar = listener.BeginGetContext(new AsyncCallback(ProcessContextAsync), this.listener);
 
+            // command loop
             while (running)
             {
+                // TODO make generic way
                 string cmd = Console.ReadLine();
 
                 if (!running)
@@ -320,6 +428,7 @@ namespace StaticFileServer
                 }
             }
 
+            // close listener
             listener.Abort();
             listener.Close();
 

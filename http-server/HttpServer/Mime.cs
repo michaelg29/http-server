@@ -3,8 +3,14 @@ using System.IO;
 
 namespace HttpServer
 {
+    /// <summary>
+    /// Class for converting file extensions to their MIME types
+    /// </summary>
     public static class Mime
     {
+        /// <summary>
+        /// dictionary mapping file extension to MIME type
+        /// </summary>
         private static readonly IDictionary<string, string> mimeTypes = new Dictionary<string, string>
         {
             { ".asf", "video/x-ms-asf" },
@@ -74,6 +80,11 @@ namespace HttpServer
             { ".zip", "application/zip" }
         };
 
+        /// <summary>
+        /// Get MIME type for corresponding file
+        /// </summary>
+        /// <param name="route">file path</param>
+        /// <returns>MIME type</returns>
         public static string GetMimeType(string route)
         {
             // find extension
@@ -83,6 +94,7 @@ namespace HttpServer
             {
                 return mimeTypes[ext];
             }
+            // default value
             return "application/octet-stream";
         }
     }

@@ -7,21 +7,55 @@ using System.Threading.Tasks;
 
 namespace HttpServer
 {
+    /// <summary>
+    /// Public interface to be inherited by server instances
+    /// </summary>
     public interface IHttpServer
     {
+        /// <summary>
+        /// Response code for current response
+        /// </summary>
         HttpStatusCode ResponseCode
         {
             set;
         }
+
+        /// <summary>
+        /// Content length for current response
+        /// </summary>
         long ContentLength
         {
             set;
         }
+
+        /// <summary>
+        /// Content type for current response
+        /// </summary>
         string ContentType
         {
             set;
         }
+
+        /// <summary>
+        /// Encoding for the current response
+        /// </summary>
+        Encoding Encoding
+        {
+            set;
+        }
+
+        /// <summary>
+        /// Send a file to the current response
+        /// </summary>
+        /// <param name="filePath">File path</param>
+        /// <param name="args"></param>
         Task SendFileAsync(string filePath, params string[] args);
+
+        /// <summary>
+        /// Run the server
+        /// </summary>
+        /// <param name="args">input arguments</param>
+        /// <returns>Exit code</returns>
         Task<int> RunAsync(string[] args);
     }
 }
