@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.32510.428
+VisualStudioVersion = 16.0.32428.217
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer", "HttpServer\HttpServer.csproj", "{15DB341C-C673-4E8C-AD9C-754DDF6A2DAE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer.Main", "HttpServer.Main\HttpServer.Main.csproj", "{DCAE358D-AB56-41B9-9889-C2CCE6A6E982}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer.Test", "HttpServer.Test\HttpServer.Test.csproj", "{D2F996DF-D873-4B7F-BFDA-9F867A6D2933}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer.Test", "HttpServer.Test\HttpServer.Test.csproj", "{AEDF5330-49F7-4525-B1B5-C86AD3E95717}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StaticFileServer", "StaticFileServer\StaticFileServer.csproj", "{4AD6E486-94FF-44F1-819E-5C6B5C87D5A2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer.StaticFileServer", "HttpServer.StaticFileServer\HttpServer.StaticFileServer.csproj", "{74B9C0CF-A599-43B1-9308-141F1BA35DA0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,23 +15,23 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{15DB341C-C673-4E8C-AD9C-754DDF6A2DAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{15DB341C-C673-4E8C-AD9C-754DDF6A2DAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{15DB341C-C673-4E8C-AD9C-754DDF6A2DAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{15DB341C-C673-4E8C-AD9C-754DDF6A2DAE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D2F996DF-D873-4B7F-BFDA-9F867A6D2933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D2F996DF-D873-4B7F-BFDA-9F867A6D2933}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D2F996DF-D873-4B7F-BFDA-9F867A6D2933}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D2F996DF-D873-4B7F-BFDA-9F867A6D2933}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4AD6E486-94FF-44F1-819E-5C6B5C87D5A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4AD6E486-94FF-44F1-819E-5C6B5C87D5A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4AD6E486-94FF-44F1-819E-5C6B5C87D5A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4AD6E486-94FF-44F1-819E-5C6B5C87D5A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCAE358D-AB56-41B9-9889-C2CCE6A6E982}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCAE358D-AB56-41B9-9889-C2CCE6A6E982}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCAE358D-AB56-41B9-9889-C2CCE6A6E982}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCAE358D-AB56-41B9-9889-C2CCE6A6E982}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEDF5330-49F7-4525-B1B5-C86AD3E95717}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEDF5330-49F7-4525-B1B5-C86AD3E95717}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEDF5330-49F7-4525-B1B5-C86AD3E95717}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEDF5330-49F7-4525-B1B5-C86AD3E95717}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74B9C0CF-A599-43B1-9308-141F1BA35DA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74B9C0CF-A599-43B1-9308-141F1BA35DA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74B9C0CF-A599-43B1-9308-141F1BA35DA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74B9C0CF-A599-43B1-9308-141F1BA35DA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {82871973-E734-46A7-B652-EFE7778B4E2B}
+		SolutionGuid = {25FA98FF-6342-4504-A169-84784199AB29}
 	EndGlobalSection
 EndGlobal
