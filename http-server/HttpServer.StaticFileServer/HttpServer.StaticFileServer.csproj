@@ -10,4 +10,16 @@
     <ProjectReference Include="..\HttpServer.Main\HttpServer.Main.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="directory.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="error.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="notFound.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
