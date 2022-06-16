@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpServer.StaticFileServer
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpServer.Logging", "HttpServer.Logging\HttpServer.Logging.csproj", "{CD44ED1A-F488-4A6D-9EC2-3042D591AE61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer.WebServer", "HttpServer.WebServer\HttpServer.WebServer.csproj", "{E79C9754-5F2A-420A-A146-B0416BCACCF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpServer.WebServer", "HttpServer.WebServer\HttpServer.WebServer.csproj", "{E79C9754-5F2A-420A-A146-B0416BCACCF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer.WebServer.Test", "HttpServer.WebServer.Test\HttpServer.WebServer.Test.csproj", "{9E11DA99-7189-4789-B702-D46E6620FB1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{E79C9754-5F2A-420A-A146-B0416BCACCF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E79C9754-5F2A-420A-A146-B0416BCACCF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E79C9754-5F2A-420A-A146-B0416BCACCF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E11DA99-7189-4789-B702-D46E6620FB1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E11DA99-7189-4789-B702-D46E6620FB1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E11DA99-7189-4789-B702-D46E6620FB1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E11DA99-7189-4789-B702-D46E6620FB1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
