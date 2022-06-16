@@ -11,7 +11,7 @@ namespace HttpServer.WebServer
         {
             NewArgType<string>(s => s, "str"),
             NewArgType<Guid>(s => (object)Guid.Parse(s)),
-            NewArgType<double>(s => (object)double.Parse(s)),
+            NewArgType<double>(s => (object)double.Parse(s), "float"),
             NewArgType<int>(s => (object)int.Parse(s), "int")
         };
 
