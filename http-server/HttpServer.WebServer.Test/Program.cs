@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using HttpServer.WebServer;
 
 namespace HttpServer.WebServer.Test
@@ -28,10 +29,10 @@ namespace HttpServer.WebServer.Test
         static void Main(string[] args)
         {
             RouteTree rt = new RouteTree();
-            rt.AddRoute("/", (ws, args) => Action_(ws));
-            rt.AddRoute("/hello", (ws, args) => Action_Hello(ws));
-            rt.AddRoute("/{int}", (ws, args) => Action_int(ws, (int)args[0]));
-            rt.AddRoute("/hello/test/{int}/{str}", (ws, args) => Action_hello_test_int_str(ws, (int)args[0], (string)args[1]));
+            rt.AddRoute("/", Action_);
+            rt.AddRoute("/hello", Action_Hello);
+            rt.AddRoute<int>("/{int}", Action_int);
+            rt.AddRoute<int, string>("/hello/test/{int}/{str}", Action_hello_test_int_str);
 
             Console.WriteLine(rt.Navigate(null, "/"));
             Console.WriteLine(rt.Navigate(null, "/hello"));
@@ -39,6 +40,18 @@ namespace HttpServer.WebServer.Test
             Console.WriteLine(rt.Navigate(null, "/123"));
             Console.WriteLine(rt.Navigate(null, "/123.5"));
             Console.WriteLine(rt.Navigate(null, "/hello/test/15/adls;kfj"));
+
+            //List<int> nums = new List<int>();
+            //for (int i = 1; i <= 15; i++)
+            //{
+            //    nums.Add(i);
+            //    string str = $@"        public void AddRoute<{string.Join(", ", nums.Select(n => $"T{n}"))}>
+            //(string route, Action<WebServer, {string.Join(", ", nums.Select(n => $"T{n}"))}> action)
+            //=> _AddRoute(route, (ws, obj) 
+            //    => action(ws, {string.Join(", ", nums.Select(n => $"(T{n})obj[{n-1}]"))}));";
+
+            //    Console.WriteLine(str + Environment.NewLine);
+            //}
         }
     }
 }
