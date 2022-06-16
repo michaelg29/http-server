@@ -55,7 +55,7 @@ namespace HttpServer.WebServer
                 }
                 catch (Exception)
                 {
-                    routeTreeNode = default;
+                    routeTreeNode = this;
                     return false;
                 }
             }
@@ -80,7 +80,7 @@ namespace HttpServer.WebServer
                 }
                 catch (Exception)
                 {
-                    routeTreeNode = default;
+                    routeTreeNode = this;
                     return false;
                 }
             }
@@ -127,6 +127,38 @@ namespace HttpServer.WebServer
                 currentNode = nextNode;
             }
             currentNode.ThisAction = action;
+        }
+
+        public bool Navigate(WebServer ws, string route)
+        {
+            if (root == null)
+            {
+                return false;
+            }
+
+            var currentNode = root;
+            var routeElements = route.Split('/');
+            var routeArgsList = new List<object>();
+            foreach (var el in routeElements)
+            {
+                if (string.IsNullOrEmpty(el)
+                    || currentNode.TryGetPlainSubRoute(el, out currentNode))
+                {
+                    continue;
+                }
+                else if (ArgType.TryParse(el, out object val, out Type type)
+                    && currentNode.TryGetArgSubRoute(type, out currentNode))
+                {
+                    routeArgsList.Add(val);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            currentNode.ThisAction(ws, routeArgsList.ToArray());
+            return true;
         }
     }
 }
