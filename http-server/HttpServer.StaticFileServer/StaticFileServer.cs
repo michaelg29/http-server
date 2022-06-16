@@ -284,7 +284,7 @@ namespace HttpServer.StaticFileServer
         /// <summary>
         /// Process current request
         /// </summary>
-        private async Task ProcessRequest()
+        protected async Task ProcessRequest()
         {
             // store route locally
             string route = Uri.UnescapeDataString(ctx.Request.Url.AbsolutePath);
@@ -361,7 +361,7 @@ namespace HttpServer.StaticFileServer
         /// Receiver for a request
         /// </summary>
         /// <param name="result">Async result</param>
-        private async void ProcessContextAsync(IAsyncResult result)
+        protected async void ProcessContextAsync(IAsyncResult result)
         {
             try
             {
