@@ -37,7 +37,7 @@ namespace HttpServer.WebServer
 
             public void SetPlainSubRoute(string element, RouteTreeNode routeTreeNode)
             {
-                if (PlainSubRoutes == null)
+                if (!HasPlainSubRoutes)
                 {
                     PlainSubRoutes = new Dictionary<string, RouteTreeNode>();
                 }
@@ -62,7 +62,7 @@ namespace HttpServer.WebServer
 
             public void SetArgSubRoute(Type argType, RouteTreeNode routeTreeNode)
             {
-                if (ArgSubRoutes == null)
+                if (!HasArgSubRoutes)
                 {
                     ArgSubRoutes = new Dictionary<Type, RouteTreeNode>();
                 }
