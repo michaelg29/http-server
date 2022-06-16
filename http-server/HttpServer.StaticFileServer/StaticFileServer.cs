@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StaticFileServer
+namespace HttpServer.StaticFileServer
 {
     /// <summary>
     /// Server class to host files from a directory
