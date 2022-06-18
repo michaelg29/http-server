@@ -375,6 +375,13 @@ namespace HttpServer.StaticFileServer
                     .With("Host", ctx.Request.UserHostName)
                     .With("Agent", ctx.Request.UserAgent));
 
+                Message m = new Message("Query");
+                foreach (var key in ctx.Request.QueryString.AllKeys)
+                {
+                    m = m.With(key, ctx.Request.QueryString.Get(key));
+                }
+                logger.Send(m);
+
                 // process and send return
                 await ProcessRequest();
 

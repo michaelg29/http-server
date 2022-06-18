@@ -4,6 +4,16 @@ using System.Text;
 
 namespace HttpServer.WebServer
 {
+    internal static class ArrayExtensions
+    {
+        internal static T Get<T>(this object[] arr, int idx)
+        {
+            return idx < arr.Length
+                ? (T)arr[idx]
+                : default;
+        }
+    }
+
     public class RouteTree
     {
         private class RouteTreeNode
@@ -28,11 +38,6 @@ namespace HttpServer.WebServer
                 : this(action)
             {
                 this.ArgType = argType;
-            }
-
-            public static RouteTreeNode NewRouteTreeNode<T>(Action<WebServer, object[]> action)
-            {
-                return new RouteTreeNode(ArgType.GetArgType(typeof(T)), action);
             }
 
             public void SetPlainSubRoute(string element, RouteTreeNode routeTreeNode)
@@ -94,80 +99,80 @@ namespace HttpServer.WebServer
             => _AddRoute(route, (ws, obj)
                 => action(ws));
 
-        public void AddRoute<T1>
-            (string route, Action<WebServer, T1> action)
+        public void AddRoute<T0>
+            (string route, Action<WebServer, T0> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0]));
+                => action(ws, obj.Get<T0>(0)));
 
-        public void AddRoute<T1, T2>
-            (string route, Action<WebServer, T1, T2> action)
+        public void AddRoute<T0, T1>
+            (string route, Action<WebServer, T0, T1> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1)));
 
-        public void AddRoute<T1, T2, T3>
-            (string route, Action<WebServer, T1, T2, T3> action)
+        public void AddRoute<T0, T1, T2>
+            (string route, Action<WebServer, T0, T1, T2> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2)));
 
-        public void AddRoute<T1, T2, T3, T4>
-            (string route, Action<WebServer, T1, T2, T3, T4> action)
+        public void AddRoute<T0, T1, T2, T3>
+            (string route, Action<WebServer, T0, T1, T2, T3> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3)));
 
-        public void AddRoute<T1, T2, T3, T4, T5>
-            (string route, Action<WebServer, T1, T2, T3, T4, T5> action)
+        public void AddRoute<T0, T1, T2, T3, T4>
+            (string route, Action<WebServer, T0, T1, T2, T3, T4> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3], (T5)obj[4]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3), obj.Get<T4>(4)));
 
-        public void AddRoute<T1, T2, T3, T4, T5, T6>
-            (string route, Action<WebServer, T1, T2, T3, T4, T5, T6> action)
+        public void AddRoute<T0, T1, T2, T3, T4, T5>
+            (string route, Action<WebServer, T0, T1, T2, T3, T4, T5> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3], (T5)obj[4], (T6)obj[5]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3), obj.Get<T4>(4), obj.Get<T5>(5)));
 
-        public void AddRoute<T1, T2, T3, T4, T5, T6, T7>
-            (string route, Action<WebServer, T1, T2, T3, T4, T5, T6, T7> action)
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6>
+            (string route, Action<WebServer, T0, T1, T2, T3, T4, T5, T6> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3], (T5)obj[4], (T6)obj[5], (T7)obj[6]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3), obj.Get<T4>(4), obj.Get<T5>(5), obj.Get<T6>(6)));
 
-        public void AddRoute<T1, T2, T3, T4, T5, T6, T7, T8>
-            (string route, Action<WebServer, T1, T2, T3, T4, T5, T6, T7, T8> action)
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7>
+            (string route, Action<WebServer, T0, T1, T2, T3, T4, T5, T6, T7> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3], (T5)obj[4], (T6)obj[5], (T7)obj[6], (T8)obj[7]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3), obj.Get<T4>(4), obj.Get<T5>(5), obj.Get<T6>(6), obj.Get<T7>(7)));
 
-        public void AddRoute<T1, T2, T3, T4, T5, T6, T7, T8, T9>
-            (string route, Action<WebServer, T1, T2, T3, T4, T5, T6, T7, T8, T9> action)
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8>
+            (string route, Action<WebServer, T0, T1, T2, T3, T4, T5, T6, T7, T8> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3], (T5)obj[4], (T6)obj[5], (T7)obj[6], (T8)obj[7], (T9)obj[8]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3), obj.Get<T4>(4), obj.Get<T5>(5), obj.Get<T6>(6), obj.Get<T7>(7), obj.Get<T8>(8)));
 
-        public void AddRoute<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
-            (string route, Action<WebServer, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> action)
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>
+            (string route, Action<WebServer, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3], (T5)obj[4], (T6)obj[5], (T7)obj[6], (T8)obj[7], (T9)obj[8], (T10)obj[9]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3), obj.Get<T4>(4), obj.Get<T5>(5), obj.Get<T6>(6), obj.Get<T7>(7), obj.Get<T8>(8), obj.Get<T9>(9)));
 
-        public void AddRoute<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
-            (string route, Action<WebServer, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> action)
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
+            (string route, Action<WebServer, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3], (T5)obj[4], (T6)obj[5], (T7)obj[6], (T8)obj[7], (T9)obj[8], (T10)obj[9], (T11)obj[10]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3), obj.Get<T4>(4), obj.Get<T5>(5), obj.Get<T6>(6), obj.Get<T7>(7), obj.Get<T8>(8), obj.Get<T9>(9), obj.Get<T10>(10)));
 
-        public void AddRoute<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>
-            (string route, Action<WebServer, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> action)
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
+            (string route, Action<WebServer, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3], (T5)obj[4], (T6)obj[5], (T7)obj[6], (T8)obj[7], (T9)obj[8], (T10)obj[9], (T11)obj[10], (T12)obj[11]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3), obj.Get<T4>(4), obj.Get<T5>(5), obj.Get<T6>(6), obj.Get<T7>(7), obj.Get<T8>(8), obj.Get<T9>(9), obj.Get<T10>(10), obj.Get<T11>(11)));
 
-        public void AddRoute<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
-            (string route, Action<WebServer, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> action)
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>
+            (string route, Action<WebServer, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3], (T5)obj[4], (T6)obj[5], (T7)obj[6], (T8)obj[7], (T9)obj[8], (T10)obj[9], (T11)obj[10], (T12)obj[11], (T13)obj[12]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3), obj.Get<T4>(4), obj.Get<T5>(5), obj.Get<T6>(6), obj.Get<T7>(7), obj.Get<T8>(8), obj.Get<T9>(9), obj.Get<T10>(10), obj.Get<T11>(11), obj.Get<T12>(12)));
 
-        public void AddRoute<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
-            (string route, Action<WebServer, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> action)
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
+            (string route, Action<WebServer, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3], (T5)obj[4], (T6)obj[5], (T7)obj[6], (T8)obj[7], (T9)obj[8], (T10)obj[9], (T11)obj[10], (T12)obj[11], (T13)obj[12], (T14)obj[13]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3), obj.Get<T4>(4), obj.Get<T5>(5), obj.Get<T6>(6), obj.Get<T7>(7), obj.Get<T8>(8), obj.Get<T9>(9), obj.Get<T10>(10), obj.Get<T11>(11), obj.Get<T12>(12), obj.Get<T13>(13)));
 
-        public void AddRoute<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>
-            (string route, Action<WebServer, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> action)
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
+            (string route, Action<WebServer, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> action)
             => _AddRoute(route, (ws, obj)
-                => action(ws, (T1)obj[0], (T2)obj[1], (T3)obj[2], (T4)obj[3], (T5)obj[4], (T6)obj[5], (T7)obj[6], (T8)obj[7], (T9)obj[8], (T10)obj[9], (T11)obj[10], (T12)obj[11], (T13)obj[12], (T14)obj[13], (T15)obj[14]));
+                => action(ws, obj.Get<T0>(0), obj.Get<T1>(1), obj.Get<T2>(2), obj.Get<T3>(3), obj.Get<T4>(4), obj.Get<T5>(5), obj.Get<T6>(6), obj.Get<T7>(7), obj.Get<T8>(8), obj.Get<T9>(9), obj.Get<T10>(10), obj.Get<T11>(11), obj.Get<T12>(12), obj.Get<T13>(13), obj.Get<T14>(14)));
         #endregion
 
         private void _AddRoute(string route, Action<WebServer, object[]> action)
@@ -218,6 +223,31 @@ namespace HttpServer.WebServer
                 return false;
             }
 
+            // get query parameters
+            int paramStart = route.IndexOf('?') + 1;
+            IDictionary<string, string> paramsMapping = null;
+            if (paramStart > 0)
+            {
+                paramsMapping = new Dictionary<string, string>();
+                string paramStr = route.Substring(paramStart);
+                route = route.Substring(0, paramStart - 1); // get rid of parameters from route
+                //Uri.UnescapeDataString(ctx.Request.Url.AbsolutePath);
+                var paramsArray = paramStr.Split('&');
+                foreach (var p in paramsArray)
+                {
+                    int split;
+                    if (string.IsNullOrEmpty(p)
+                        || (split = p.IndexOf('=')) == -1)
+                    {
+                        continue;
+                    }
+
+                    paramsMapping.Add(
+                        Uri.UnescapeDataString(p.Substring(0, split)),
+                        Uri.UnescapeDataString(p.Substring(split + 1)));
+                }
+            }
+
             var currentNode = root;
             var routeElements = route.Split('/');
             var routeArgsList = new List<object>();
@@ -239,8 +269,20 @@ namespace HttpServer.WebServer
                 }
             }
 
-            currentNode.ThisAction(ws, routeArgsList.ToArray());
-            return true;
+            if (paramsMapping != null)
+            {
+                routeArgsList.Add(paramsMapping);
+            }
+
+            try
+            {
+                currentNode.ThisAction(ws, routeArgsList.ToArray());
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
