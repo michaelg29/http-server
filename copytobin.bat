@@ -1,7 +1,9 @@
 copy http-server\HttpServer.Logging\bin\Release\netcoreapp3.1\HttpServer.Logging.dll bin
 copy http-server\HttpServer.Main\bin\Release\netcoreapp3.1\HttpServer.Main.dll bin
+copy http-server\HttpServer.StaticFileServer\bin\Release\netcoreapp3.1\HttpServer.StaticFileServer.deps.json bin
 copy http-server\HttpServer.StaticFileServer\bin\Release\netcoreapp3.1\HttpServer.StaticFileServer.dll bin
 copy http-server\HttpServer.StaticFileServer\bin\Release\netcoreapp3.1\HttpServer.StaticFileServer.exe bin
+copy http-server\HttpServer.StaticFileServer\bin\Release\netcoreapp3.1\HttpServer.StaticFileServer.runtimeconfig.json bin
 copy http-server\HttpServer.StaticFileServer\bin\Release\netcoreapp3.1\directory.html bin
 copy http-server\HttpServer.StaticFileServer\bin\Release\netcoreapp3.1\error.html bin
 copy http-server\HttpServer.StaticFileServer\bin\Release\netcoreapp3.1\notFound.html bin

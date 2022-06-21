@@ -3,7 +3,7 @@
 
 # Running
 All of the files needed to run the server are in the directory *bin*. You should add this directory to your PATH environment variable so it can be located from any terminal window, regardles of the current directory. Then, all you need to do is run the following command:
-```StaticFileServer [-d <directory>] [-u <url>]```
+```HttpServer.StaticFileServer [-d <directory>] [-u <url>]```
 The parameters are optional, but here are their uses:
 * `<directory>`: The directory that will be used to fetch contents. It can be absolute or relative to the current working directory in the terminal window. If left unset, then the server will fetch contents from the current working directory.
 * `<url>`: The url the server will listen on. It must end with a slash (`/`). If left unset, it will default to `http://+:8080/`, which will tell the server to listen on the following URLs:
