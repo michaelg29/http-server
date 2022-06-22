@@ -2,73 +2,45 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace HttpServer.WebServer
 {
     public class ArgType
     {
-        private static IList<ArgType> mappings = new List<ArgType>
+        private static IList<ArgType> argTypes = new List<ArgType>
         {
-            NewArgType<string>(s => s, "str"),
-            NewArgType<Guid>(s => (object)Guid.Parse(s)),
-            NewArgType<double>(s => (object)double.Parse(s), "float"),
-            NewArgType<int>(s => (object)int.Parse(s), "int")
+            new ArgType(typeof(string), s => s, "str"),
+            new ArgType(typeof(Guid), s => Guid.Parse(s)),
+            new ArgType(typeof(double), s => double.Parse(s), "float"),
+            new ArgType(typeof(int), s => int.Parse(s), "int"),
+            new ArgType(typeof(bool), s => bool.Parse(s), "bool")
         };
-
-        private static ArgType NewArgType<T>(Func<string, object> parser, params string[] altNames)
-        {
-            return new ArgType(typeof(T), parser, altNames);
-        }
 
         public static void RegisterType<T>(Func<string, object> parser, params string[] altNames)
         {
-            for (int i = 0; i < mappings.Count; i++)
+            ArgType existingArgType = argTypes.Where(at => at.Type == typeof(T)).SingleOrDefault();
+            if (existingArgType != null)
             {
-                if (mappings[i].Type == typeof(T))
-                {
-                    mappings.RemoveAt(i);
-                }
+                existingArgType.Parser = parser;
+                existingArgType.AltNames.Concat(altNames);
             }
-
-            mappings.Add(NewArgType<T>(parser, altNames));
-        }
-
-        public static ArgType GetArgType(Type argType)
-        {
-            foreach (var mapping in mappings)
+            else
             {
-                if (mapping.Type == argType)
-                {
-                    return mapping;
-                }
+                argTypes.Add(new ArgType(typeof(T), parser, altNames));
             }
-
-            return null;
-        }
-
-        public static ArgType GetArgType(string argTypeStr)
-        {
-            foreach (var mapping in mappings)
-            {
-                if (mapping.AltNames.Contains(argTypeStr))
-                {
-                    return mapping;
-                }
-            }
-
-            return null;
         }
 
         public static bool TryParse(string valStr, out object val, out Type type)
         {
-            // priority at top
-            for (int i = mappings.Count - 1; i >= 0; i--)
+            // priority at top of list
+            for (int i = argTypes.Count - 1; i >= 0; i--)
             {
-                var mapping = mappings[i];
+                var argType = argTypes[i];
                 try
                 {
-                    val = mapping.Parser(valStr);
-                    type = mapping.Type;
+                    val = argType.Parser(valStr);
+                    type = argType.Type;
                     return true;
                 }
                 catch
@@ -86,7 +58,7 @@ namespace HttpServer.WebServer
         {
             try
             {
-                val = GetArgType(typeof(T)).Parse<T>(valStr);
+                val = (T)GetArgType(typeof(T)).Parser(valStr);
                 return true;
             }
             catch
@@ -96,26 +68,36 @@ namespace HttpServer.WebServer
             }
         }
 
-        public T Parse<T>(string valStr)
+        public static ArgType GetArgType(Type argType)
         {
-            return (T)Parser(valStr);
+            return argTypes
+                .Where(a => a.Type == argType)
+                .FirstOrDefault();
+        }
+
+        public static ArgType GetArgType(string argTypeStr)
+        {
+            argTypeStr = argTypeStr.ToLower();
+            return argTypes
+                .Where(a => a.AltNames.Contains(argTypeStr))
+                .FirstOrDefault();
         }
 
         public Type Type { get; private set; }
         public Func<string, object> Parser { get; private set; }
         public HashSet<string> AltNames { get; private set; }
 
-        private ArgType(Type type, Func<string, object> Parser, IList<string> altNames = null)
+        private ArgType(Type type, Func<string, object> parser, params string[] altNames)
         {
-            this.Type = type;
-            this.Parser = Parser;
+            Type = type;
+            Parser = parser;
 
-            this.AltNames = new HashSet<string>();
-            foreach (string name in altNames)
+            AltNames = new HashSet<string>();
+            foreach (string altName in altNames)
             {
-                this.AltNames.Add(name);
+                AltNames.Add(altName.ToLower());
             }
-            this.AltNames.Add(type.Name);
+            AltNames.Add(type.Name.ToLower());
         }
     }
 }
