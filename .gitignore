@@ -1,5 +1,7 @@
-
-http-server/.vs
-http-server/*/bin
+.vs
+Debug
+Release
 obj
 *.csproj.user
+*.pdb
+*.config

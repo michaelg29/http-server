@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Http.HttpMethod;
+using static HttpServer.Main.Extensions;
 
 namespace HttpServer.WebServer.Test
 {
