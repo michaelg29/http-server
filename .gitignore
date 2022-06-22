@@ -4,4 +4,4 @@ Release
 obj
 *.csproj.user
 *.pdb
-*.config
+.exe.config
