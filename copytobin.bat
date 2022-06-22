@@ -1,6 +1,5 @@
 copy HttpServer\HttpServer.Logging\bin\Release\HttpServer.Logging.dll bin
 copy HttpServer\HttpServer.Main\bin\Release\HttpServer.Main.dll bin
-copy HttpServer\HttpServer.StaticFileServer\bin\Release\HttpServer.StaticFileServer.dll bin
 copy HttpServer\HttpServer.StaticFileServer\bin\Release\HttpServer.StaticFileServer.exe bin
 copy HttpServer\HttpServer.StaticFileServer\bin\Release\directory.html bin
 copy HttpServer\HttpServer.StaticFileServer\bin\Release\error.html bin
