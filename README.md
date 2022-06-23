@@ -13,3 +13,4 @@ The parameters are optional, but here are their uses:
 
 # Troubleshooting
 * If you get the error: `Access is denied` when trying to start, you must allow the program through the firewall along with the specific port.
+    * Also run the following command in a powershell session with administrator permissions: ` netsh http add urlacl url=http://+:8008/ user=Everyone listen=yes`
