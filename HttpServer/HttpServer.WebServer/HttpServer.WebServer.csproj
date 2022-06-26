@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7606C81D-9ED5-4A57-A543-97DA34CE29A4}</ProjectGuid>
+    <ProjectGuid>{302B03D9-2E41-42CE-9248-10656D3C3EED}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HttpServer.WebServer</RootNamespace>
@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,18 +49,7 @@
     <Compile Include="RouteTree.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HttpServer.Logging\HttpServer.Logging.csproj">
-      <Project>{2ba901ed-e522-4d6b-b547-08fd1c47b8dc}</Project>
-      <Name>HttpServer.Logging</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\HttpServer.Main\HttpServer.Main.csproj">
-      <Project>{e228a5d2-35d8-47d6-9eb8-92ec7ca33469}</Project>
-      <Name>HttpServer.Main</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\HttpServer.StaticFileServer\HttpServer.StaticFileServer.csproj">
-      <Project>{3a6e8a10-1ee6-409c-9fd7-ff7ba738b6a3}</Project>
-      <Name>HttpServer.StaticFileServer</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3E8C036C-47E1-454C-9DF6-C56B4D302FAF}</ProjectGuid>
+    <ProjectGuid>{B47DC35C-86D6-440F-8547-6858C119C026}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>HttpServer.WebServer.Test</RootNamespace>
     <AssemblyName>HttpServer.WebServer.Test</AssemblyName>
@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,18 +51,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HttpServer.Logging\HttpServer.Logging.csproj">
-      <Project>{2ba901ed-e522-4d6b-b547-08fd1c47b8dc}</Project>
-      <Name>HttpServer.Logging</Name>
-    </ProjectReference>
     <ProjectReference Include="..\HttpServer.Main\HttpServer.Main.csproj">
       <Project>{e228a5d2-35d8-47d6-9eb8-92ec7ca33469}</Project>
       <Name>HttpServer.Main</Name>
     </ProjectReference>
     <ProjectReference Include="..\HttpServer.WebServer\HttpServer.WebServer.csproj">
-      <Project>{7606c81d-9ed5-4a57-a543-97da34ce29a4}</Project>
+      <Project>{302b03d9-2e41-42ce-9248-10656d3c3eed}</Project>
       <Name>HttpServer.WebServer</Name>
     </ProjectReference>
   </ItemGroup>

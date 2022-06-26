@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using static System.Net.Http.HttpMethod;
 using static HttpServer.Main.Extensions;
@@ -97,7 +97,7 @@ namespace HttpServer.WebServer.Test
             Console.WriteLine(rt.TryNavigate(Patch, "/hello/test/17/asdg"));
             Console.WriteLine(rt.TryNavigate(Get, "/hello/query?age=123"));
             Console.WriteLine(rt.TryNavigate(Put, "/greet",
-                JsonSerializer.Serialize<TestClass>(testClass)));
+                JsonConvert.SerializeObject(testClass)));
 
             //List<int> nums = new List<int>();
             //for (int i = 0; i < 16; i++)

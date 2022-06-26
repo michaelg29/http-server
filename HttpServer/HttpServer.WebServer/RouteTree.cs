@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace HttpServer.WebServer
 {
@@ -220,8 +218,7 @@ namespace HttpServer.WebServer
                     }
 
                     // look in query or body
-                    string valueStr;
-                    if (!queryParams.TryGetValue(param.Name, out valueStr))
+                    if (!queryParams.TryGetValue(param.Name, out string valueStr))
                     {
                         // if not in query, assign as body
                         valueStr = body;
@@ -236,7 +233,7 @@ namespace HttpServer.WebServer
                     try
                     {
                         argsList.Add(
-                            JsonSerializer.Deserialize(valueStr, param.ParameterType));
+                            JsonConvert.DeserializeObject(valueStr, param.ParameterType));
                         continue;
                     }
                     catch { }
