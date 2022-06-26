@@ -6,27 +6,84 @@ using System.Net.Http;
 
 namespace HttpServer.WebServer
 {
+    internal static class IDictionaryExtensions
+    {
+        /// <summary>
+        /// Try and get a value from a possibly null dictionary
+        /// </summary>
+        /// <typeparam name="T">Key type</typeparam>
+        /// <typeparam name="U">Value type</typeparam>
+        /// <param name="dict">Possibly null dictionary</param>
+        /// <param name="key">Key</param>
+        /// <param name="val">Output value</param>
+        /// <param name="defaultVal">Default value to assign to output</param>
+        /// <returns>If the dictionary exists and the key was found</returns>
+        public static bool TryGet<T, U>(IDictionary<T, U> dict, T key, out U val, U defaultVal = default)
+        {
+            if ((dict?.ContainsKey(key)).GetValueOrDefault())
+            {
+                val = dict[key];
+                return true;
+            }
+
+            val = defaultVal;
+            return false;
+        }
+    }
+
     public class RouteTree
     {
+        /// <summary>
+        /// Private node class for RouteTree
+        /// </summary>
         private class RouteTreeNode
         {
+            /// <summary>
+            /// Variable name of the argument
+            /// </summary>
             public string ArgName { get; set; }
+
+            /// <summary>
+            /// ArgType instance for the argument
+            /// </summary>
             public ArgType ArgType { get; set; }
+
+            /// <summary>
+            /// Mapping of HttpMethods to actions
+            /// </summary>
             private IDictionary<HttpMethod, Delegate> Functions { get; set; }
 
+            /// <summary>
+            /// Any subroutes not requiring an argument
+            /// </summary>
             private IDictionary<string, RouteTreeNode> PlainSubRoutes { get; set; } // route => node
+            
+            /// <summary>
+            /// Any subroutes requiring an argument
+            /// </summary>
             private IDictionary<Type, RouteTreeNode> ArgSubRoutes { get; set; } // arg type => node
 
-            // plain route
+            /// <summary>
+            /// Plain route constructor
+            /// </summary>
             public RouteTreeNode() { }
 
-            // arg route
+            /// <summary>
+            /// Argument route constructor
+            /// </summary>
+            /// <param name="argName">Name of the variable</param>
+            /// <param name="argType">ArgType of the argument</param>
             public RouteTreeNode(string argName, ArgType argType)
             {
                 ArgName = argName;
                 ArgType = argType;
             }
 
+            /// <summary>
+            /// Set corresponding function for an HttpMethod
+            /// </summary>
+            /// <param name="key">HttpMethod</param>
+            /// <param name="value">Function to associate</param>
             public Delegate this[HttpMethod key]
             {
                 set
@@ -40,20 +97,20 @@ namespace HttpServer.WebServer
                 }
             }
 
+            /// <summary>
+            /// Obtain the endpoint action corresponding to the HttpMethod
+            /// </summary>
+            /// <param name="method">HttpMethod</param>
+            /// <param name="function">Output function</param>
+            /// <returns>If the action exists</returns>
             public bool TryGetFunction(HttpMethod method, out Delegate function)
-            {
-                if ((Functions?.ContainsKey(method)).GetValueOrDefault())
-                {
-                    function = Functions[method];
-                    return true;
-                }
-                else
-                {
-                    function = default;
-                    return false;
-                }
-            }
+                => IDictionaryExtensions.TryGet(Functions, method, out function);
 
+            /// <summary>
+            /// Set corresponding node for a subroute without an argument
+            /// </summary>
+            /// <param name="key">Subroute value</param>
+            /// <param name="value">RouteTreeNode to associate</param>
             public RouteTreeNode this[string key]
             {
                 set
@@ -66,20 +123,20 @@ namespace HttpServer.WebServer
                 }
             }
 
+            /// <summary>
+            /// Obtain the non-argument node corresponding to the string value
+            /// </summary>
+            /// <param name="element">string value of the route element</param>
+            /// <param name="rtn">Corresponding node</param>
+            /// <returns>If the subroute exists</returns>
             public bool TryGetPlainSubRoute(string element, out RouteTreeNode rtn)
-            {
-                if ((PlainSubRoutes?.ContainsKey(element)).GetValueOrDefault())
-                {
-                    rtn = PlainSubRoutes[element];
-                    return true;
-                }
-                else
-                {
-                    rtn = this;
-                    return false;
-                }
-            }
+                => IDictionaryExtensions.TryGet(PlainSubRoutes, element, out rtn, this);
 
+            /// <summary>
+            /// Set corresponding node for a subroute with an argument
+            /// </summary>
+            /// <param name="key">Type of argument</param>
+            /// <param name="value">RouteTreeNode to associate</param>
             public RouteTreeNode this[Type key]
             {
                 set
@@ -92,19 +149,14 @@ namespace HttpServer.WebServer
                 }
             }
 
+            /// <summary>
+            /// Obtain the argument node corresponding to the argument type
+            /// </summary>
+            /// <param name="element">Argument type of the node</param>
+            /// <param name="rtn">Corresponding node</param>
+            /// <returns>If the subroute exists</returns>
             public bool TryGetArgSubRoute(Type argType, out RouteTreeNode rtn)
-            {
-                if ((ArgSubRoutes?.ContainsKey(argType)).GetValueOrDefault())
-                {
-                    rtn = ArgSubRoutes[argType];
-                    return true;
-                }
-                else
-                {
-                    rtn = default;
-                    return false;
-                }
-            }
+                => IDictionaryExtensions.TryGet(ArgSubRoutes, argType, out rtn, this);
         }
 
         private RouteTreeNode root;
@@ -116,6 +168,7 @@ namespace HttpServer.WebServer
                 root = new RouteTreeNode();
             }
 
+            // start at root and build path to target node
             var currentNode = root;
             foreach (var el in route.Split('/'))
             {
@@ -127,6 +180,7 @@ namespace HttpServer.WebServer
                 RouteTreeNode nextNode = null;
                 if (el.StartsWith("{") && el.EndsWith("}"))
                 {
+                    // argument node identified by: {name:type}
                     string typeStr = el.Substring(1, el.Length - 2);
                     // get name
                     int idx = typeStr.IndexOf(':');
@@ -141,6 +195,7 @@ namespace HttpServer.WebServer
                         name = typeStr.Substring(0, idx);
                         typeStr = typeStr.Substring(idx + 1);
                     }
+                    // get type
                     ArgType argType = ArgType.GetArgType(typeStr);
                     nextNode = currentNode.TryGetArgSubRoute(argType.Type, out RouteTreeNode rtn)
                         ? rtn
@@ -160,6 +215,13 @@ namespace HttpServer.WebServer
             currentNode[method] = function;
         }
 
+        /// <summary>
+        /// Call the action corresponding to a route and method
+        /// </summary>
+        /// <param name="method">The method</param>
+        /// <param name="route">The route</param>
+        /// <param name="body">The request body</param>
+        /// <returns>Whether the action was found</returns>
         public bool TryNavigate(HttpMethod method, string route, string body = null)
         {
             if (root == null)
@@ -167,6 +229,7 @@ namespace HttpServer.WebServer
                 return false;
             }
 
+            // parse query parameters
             IDictionary<string, string> queryParams = new Dictionary<string, string>();
             int paramIdx = route.IndexOf('?');
             if (paramIdx != -1)
@@ -181,6 +244,7 @@ namespace HttpServer.WebServer
                 }
             }
 
+            // parse route parameters while traversing the tree to find the action
             var currentNode = root;
             IDictionary<string, object> routeArgs = new Dictionary<string, object>();
             foreach (var routeElement in route.Split('/'))
@@ -189,11 +253,13 @@ namespace HttpServer.WebServer
 
                 if (currentNode.TryGetPlainSubRoute(routeElement, out currentNode))
                 {
+                    // move to next node
                     continue;
                 }
                 else if (ArgType.TryParse(routeElement, out object val, out Type type)
                     && currentNode.TryGetArgSubRoute(type, out currentNode))
                 {
+                    // set argument value in dictionary
                     routeArgs[currentNode.ArgName] = val;
                 }
                 else
@@ -202,12 +268,11 @@ namespace HttpServer.WebServer
                 }
             }
 
+            // find action corresponding to the method
             if (currentNode.TryGetFunction(method, out var function))
             {
-                bool bodyExists = !string.IsNullOrEmpty(body);
+                // place arguments in order specified by the method
                 IList<object> argsList = new List<object>();
-
-                // construct arguments in order
                 foreach (var param in function.Method.GetParameters())
                 {
                     if (routeArgs.TryGetValue(param.Name, out object value))
@@ -224,23 +289,29 @@ namespace HttpServer.WebServer
                         valueStr = body;
                     }
 
-                    if (ArgType.TryParse(param.ParameterType, valueStr, out object objVal))
+                    if (!string.IsNullOrEmpty(valueStr))
                     {
-                        argsList.Add(objVal);
-                        continue;
-                    }
+                        // parse query or body value as argument
+                        if (ArgType.TryParse(param.ParameterType, valueStr, out object objVal))
+                        {
+                            argsList.Add(objVal);
+                            continue;
+                        }
 
-                    try
-                    {
-                        argsList.Add(
-                            JsonConvert.DeserializeObject(valueStr, param.ParameterType));
-                        continue;
+                        try
+                        {
+                            // try JSON deserializing value
+                            argsList.Add(
+                                JsonConvert.DeserializeObject(valueStr, param.ParameterType));
+                            continue;
+                        }
+                        catch { }
                     }
-                    catch { }
 
                     argsList.Add(null);
                 }
 
+                // call function
                 function.DynamicInvoke(argsList.ToArray());
                 return true;
             }

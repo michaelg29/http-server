@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 
 namespace HttpServer.WebServer
 {
+    /// <summary>
+    /// Class to identify and parse arguments
+    /// </summary>
     public class ArgType
     {
+        /// <summary>
+        /// Set of predefined types with their parsers
+        /// </summary>
         private static IList<ArgType> argTypes = new List<ArgType>
         {
             new ArgType(typeof(string), s => s, "str"),
@@ -17,8 +23,15 @@ namespace HttpServer.WebServer
             new ArgType(typeof(bool), s => bool.Parse(s), "bool")
         };
 
+        /// <summary>
+        /// Add a new type to the list
+        /// </summary>
+        /// <typeparam name="T">Type to parse</typeparam>
+        /// <param name="parser">Parser callback</param>
+        /// <param name="altNames">Alternate names to identify the type by</param>
         public static void RegisterType<T>(Func<string, object> parser, params string[] altNames)
         {
+            // find existing type, otherwise add
             ArgType existingArgType = argTypes.Where(at => at.Type == typeof(T)).SingleOrDefault();
             if (existingArgType != null)
             {
@@ -31,6 +44,13 @@ namespace HttpServer.WebServer
             }
         }
 
+        /// <summary>
+        /// Parse a string into an argument
+        /// </summary>
+        /// <param name="valStr">String to parse</param>
+        /// <param name="val">Parsed argument value</param>
+        /// <param name="type">Parsed argument type</param>
+        /// <returns>If the string was successfully parsed</returns>
         public static bool TryParse(string valStr, out object val, out Type type)
         {
             // priority at top of list
@@ -54,6 +74,13 @@ namespace HttpServer.WebServer
             return false;
         }
 
+        /// <summary>
+        /// Parse a string into an argument
+        /// </summary>
+        /// <typeparam name="T">Specific type to parse</typeparam>
+        /// <param name="valStr">String to parse</param>
+        /// <param name="val">Output value</param>
+        /// <returns>If the string was successfully parsed into the specified type</returns>
         public static bool TryParse<T>(string valStr, out T val)
         {
             val = default;
@@ -65,6 +92,13 @@ namespace HttpServer.WebServer
             return false;
         }
 
+        /// <summary>
+        /// Parse a string into an argument
+        /// </summary>
+        /// <param name="type">Specific type to parse</typeparam>
+        /// <param name="valStr">String to parse</param>
+        /// <param name="val">Output value</param>
+        /// <returns>If the string was successfully parsed into the specified type</returns>
         public static bool TryParse(Type type, string valStr, out object val)
         {
             try
@@ -79,6 +113,11 @@ namespace HttpServer.WebServer
             }
         }
 
+        /// <summary>
+        /// Get instance of ArgType corresponding to the type
+        /// </summary>
+        /// <param name="argType">Type</param>
+        /// <returns>Corresponding instance, null if does not exist</returns>
         public static ArgType GetArgType(Type argType)
         {
             return argTypes
@@ -86,6 +125,11 @@ namespace HttpServer.WebServer
                 .FirstOrDefault();
         }
 
+        /// <summary>
+        /// Get instance of ArgType corresponding to the string name
+        /// </summary>
+        /// <param name="argTypeStr">String name</param>
+        /// <returns>Corresponding instance, null if does not exist</returns>
         public static ArgType GetArgType(string argTypeStr)
         {
             argTypeStr = argTypeStr.ToLower();
@@ -94,10 +138,27 @@ namespace HttpServer.WebServer
                 .FirstOrDefault();
         }
 
+        /// <summary>
+        /// Type of the argument
+        /// </summary>
         public Type Type { get; private set; }
+
+        /// <summary>
+        /// Parser function to deserialize from a string
+        /// </summary>
         public Func<string, object> Parser { get; private set; }
+
+        /// <summary>
+        /// Identifying names
+        /// </summary>
         public HashSet<string> AltNames { get; private set; }
 
+        /// <summary>
+        /// Create an ArgType
+        /// </summary>
+        /// <param name="type">Type of argument</param>
+        /// <param name="parser">Parser function</param>
+        /// <param name="altNames">Identifying names</param>
         private ArgType(Type type, Func<string, object> parser, params string[] altNames)
         {
             Type = type;
