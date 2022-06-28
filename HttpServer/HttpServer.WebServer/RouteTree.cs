@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace HttpServer.WebServer
 {
@@ -320,73 +321,142 @@ namespace HttpServer.WebServer
         }
 
         #region TEMPLATE ADD METHODS
+
+        public void AddRoute
+            (HttpMethod method, string route, Func<Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0>
+            (HttpMethod method, string route, Func<T0, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1>
+            (HttpMethod method, string route, Func<T0, T1, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2>
+            (HttpMethod method, string route, Func<T0, T1, T2, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, Task> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, Task> function)
+                => _AddRoute(method, route, function);
+
         public void AddRoute
             (HttpMethod method, string route, Action action)
                 => _AddRoute(method, route, action);
 
         public void AddRoute<T0>
-            (HttpMethod method, string route, Action<T0> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1>
-            (HttpMethod method, string route, Action<T0, T1> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2>
-            (HttpMethod method, string route, Action<T0, T1, T2> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4, T5>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4, T5, T6>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> action)
+                => _AddRoute(method, route, action);
 
         public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>
-            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> function)
-                => _AddRoute(method, route, function);
+            (HttpMethod method, string route, Action<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> action)
+                => _AddRoute(method, route, action);
 
         #endregion
     }
