@@ -12,10 +12,10 @@ namespace HttpServer.WebServer.Test
 {
     class TestClass
     {
-        public string name { get; set; }
-        public int age { get; set; }
-        public int grade { get; set; }
-        public string home { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public int Grade { get; set; }
+        public string Home { get; set; }
     }
 
     class Program
@@ -49,7 +49,7 @@ namespace HttpServer.WebServer.Test
 
         static async Task Action_body(TestClass testClass)
         {
-            await ws.SendStringAsync($"Hello, {testClass.name} ({testClass.age}), welcome to grade {testClass.grade}, I hope the journey from {testClass.home} wasn't too difficult.");
+            await ws.SendStringAsync($"Hello, {testClass.Name} ({testClass.Age}), welcome to grade {testClass.Grade}, I hope the journey from {testClass.Home} wasn't too difficult.");
         }
 
         async static Task Main(string[] args)
