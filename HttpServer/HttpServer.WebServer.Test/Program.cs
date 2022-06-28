@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using HttpServer.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace HttpServer.WebServer.Test
 
     class Program
     {
+        static WebServer ws;
+
         static void Action_()
         {
             Console.WriteLine("Action_");
@@ -39,17 +42,17 @@ namespace HttpServer.WebServer.Test
             Console.WriteLine($"Action_hello_test_int_str: {num}, {str}");
         }
 
-        static void Action_hello_query(string name, int age)
+        static async void Action_hello_query(string name, int age)
         {
-            Console.WriteLine($"Hello, {name}, with age {age}");
+            await ws.SendStringAsync($"Hello, {name}, with age {age}");
         }
 
-        static void Action_body(TestClass testClass)
+        static async Task Action_body(TestClass testClass)
         {
-            Console.WriteLine($"Hello, {testClass.name} ({testClass.age}), welcome to grade {testClass.grade}, I hope the journey from {testClass.home} wasn't too difficult.");
+            await ws.SendStringAsync($"Hello, {testClass.name} ({testClass.age}), welcome to grade {testClass.grade}, I hope the journey from {testClass.home} wasn't too difficult.");
         }
 
-        static void Main(string[] args)
+        async static Task Main(string[] args)
         {
             //object val;
             //Type type;
@@ -73,39 +76,22 @@ namespace HttpServer.WebServer.Test
             //    }
             //}
 
-            RouteTree rt = new RouteTree();
-            rt.AddRoute(Get, "/", Action_);
-            rt.AddRoute(Post, "/hello", Action_Hello);
-            rt.AddRoute<int>(Put, "/{num:int}", Action_int);
-            rt.AddRoute<int, string>(Patch, "/hello/test/{num:int}/{str}", Action_hello_test_int_str);
-            rt.AddRoute<string, int>(Get, "/hello/query", Action_hello_query);
-            rt.AddRoute<TestClass>(Put, "/greet", Action_body);
-
-            TestClass testClass = new TestClass
-            {
-                name = "Michael",
-                age = 124,
-                grade = 123,
-                home = "Antarctica"
-            };
-
-            Console.WriteLine(rt.TryNavigate(Get, "/"));
-            Console.WriteLine(rt.TryNavigate(Post, "/hello"));
-            Console.WriteLine(rt.TryNavigate(Put, "/15"));
-            Console.WriteLine(rt.TryNavigate(Patch, "/hello"));
-            Console.WriteLine(rt.TryNavigate(Delete, "/15"));
-            Console.WriteLine(rt.TryNavigate(Patch, "/hello/test/17/asdg"));
-            Console.WriteLine(rt.TryNavigate(Get, "/hello/query?age=123"));
-            Console.WriteLine(rt.TryNavigate(Put, "/greet",
-                JsonConvert.SerializeObject(testClass)));
+            ws = new WebServer("http://+:8080/", null, Logger.ConsoleLogger);
+            ws.RouteTree.AddRoute(Get, "/", Action_);
+            ws.RouteTree.AddRoute(Get, "/hello", Action_Hello);
+            ws.RouteTree.AddRoute<int>(Get, "/{num:int}", Action_int);
+            ws.RouteTree.AddRoute<int, string>(Get, "/hello/test/{num:int}/{str}", Action_hello_test_int_str);
+            ws.RouteTree.AddRoute<string, int>(Get, "/hello/query", Action_hello_query);
+            ws.RouteTree.AddRoute<TestClass>(Get, "/greet", Action_body);
+            await ws.RunAsync(args);
 
             //List<int> nums = new List<int>();
             //for (int i = 0; i < 16; i++)
             //{
             //    nums.Add(i);
             //    string str = $@"        public void AddRoute<{string.Join(", ", nums.Select(n => $"T{n}"))}>
-            //(HttpMethod method, string route, Action<{string.Join(", ", nums.Select(n => $"T{n}"))}> function)
-            //    => _AddRoute(method, route, function);";
+            //(HttpMethod method, string route, Action<{string.Join(", ", nums.Select(n => $"T{n}"))}> action)
+            //    => _AddRoute(method, route, action);";
 
             //    Console.WriteLine(str + Environment.NewLine);
             //}

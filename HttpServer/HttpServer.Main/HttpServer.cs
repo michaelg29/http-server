@@ -246,7 +246,7 @@ namespace HttpServer.Main
         }
 
         /// <inheritdoc />
-        public async Task SendStringAsync(string content, string contentType, params string[] args)
+        public async Task SendStringAsync(string content, string contentType="text", params string[] args)
         {
             // flush existing stream
             await ctx.Response.OutputStream.FlushAsync();
@@ -300,13 +300,6 @@ namespace HttpServer.Main
                     .With("Method", ctx.Request.HttpMethod)
                     .With("Host", ctx.Request.UserHostName)
                     .With("Agent", ctx.Request.UserAgent));
-
-                Message m = new Message("Query");
-                foreach (var key in ctx.Request.QueryString.AllKeys)
-                {
-                    m = m.With(key, ctx.Request.QueryString.Get(key));
-                }
-                logger.Send(m);
 
                 // process and send return
                 await ProcessRequest();
