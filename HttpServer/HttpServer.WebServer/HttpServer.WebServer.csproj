@@ -51,5 +51,15 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HttpServer.Logging\HttpServer.Logging.csproj">
+      <Project>{2ba901ed-e522-4d6b-b547-08fd1c47b8dc}</Project>
+      <Name>HttpServer.Logging</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HttpServer.Main\HttpServer.Main.csproj">
+      <Project>{e228a5d2-35d8-47d6-9eb8-92ec7ca33469}</Project>
+      <Name>HttpServer.Main</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
