@@ -54,10 +54,15 @@ namespace HttpServer.WebServer.Test
 
         static async Task<TestClassGreeting> Action_body(string name, int age, int grade, string home)
         {
-            return await Task.FromResult(new TestClassGreeting
+            return await Task.FromResult(Action_greet(name, age, grade, home));
+        }
+
+        static TestClassGreeting Action_greet(string name, int age, int grade, string home)
+        {
+            return new TestClassGreeting
             {
                 Greeting = $"Hello, {name} ({age}), welcome to grade {grade}, I hope the journey from {home} wasn't too difficult."
-            });
+            };
         }
 
         static async Task<TestClassGreeting> Action_body(TestClass testClass)
@@ -85,8 +90,9 @@ namespace HttpServer.WebServer.Test
             ws.RouteTree.AddRoute<int>(Get, "/{num:int}", Action_int);
             ws.RouteTree.AddRoute<int, string>(Get, "/hello/test/{num:int}/{str}", Action_hello_test_int_str);
             ws.RouteTree.AddRoute<string, int>(Get, "/hello/query", Action_hello_query);
-            ws.RouteTree.AddRoute<TestClass>(Post, "/greet", Action_body);
-            ws.RouteTree.AddRoute<string, int, int, string>(Get, "/greet", Action_body);
+            ws.RouteTree.AddRoute<TestClass>(Get, "/greetjson", Action_body);
+            ws.RouteTree.AddRoute<string, int, int, string>(Get, "/greetasync", Action_body);
+            ws.RouteTree.AddRoute<string, int, int, string, TestClassGreeting>(Get, "/greet", Action_greet);
             ws.RouteTree.AddRoute<int, int>(Get, "/increment", Action_increment);
             ws.RouteTree.AddRoute<int, int, int>(Get, "/subtract", Action_subtract);
 
