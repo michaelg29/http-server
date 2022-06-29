@@ -223,13 +223,11 @@ namespace HttpServer.WebServer
         /// <param name="route">The route</param>
         /// <param name="body">The request body</param>
         /// <returns>Whether the action was found</returns>
-        public async bool TryNavigate(HttpMethod method, string route, out object ret, out Type retType, string body = null)
+        public async Task<(bool, object, Type)> TryNavigate(HttpMethod method, string route, string body = null)
         {
-            ret = default;
-            retType = default;
             if (root == null)
             {
-                return false;
+                return (false, null, null);
             }
 
             // parse query parameters
@@ -267,7 +265,7 @@ namespace HttpServer.WebServer
                 }
                 else
                 {
-                    return false;
+                    return (false, null, null);
                 }
             }
 
@@ -315,21 +313,103 @@ namespace HttpServer.WebServer
                 }
 
                 // call function
-                ret = function.DynamicInvoke(argsList.ToArray());
-                retType = function.Method.ReturnType;
-                if (retType.Name == typeof(Task).Name
-                    && retType.GenericTypeArguments.Length > 0)
+                object ret = function.DynamicInvoke(argsList.ToArray());
+                Type retType = function.Method.ReturnType;
+                if (retType.IsGenericType
+                    && retType.GetGenericTypeDefinition() == typeof(Task<>))
                 {
-                    retType = retType.GenericTypeArguments[0];
-                    ret = ((Task<int>)ret).GetAwaiter().GetResult();
+                    // await task completion
+                    Task task = ret as Task;
+                    await task.ConfigureAwait(false);
+
+                    if (retType.GetGenericArguments().Length > 0)
+                    {
+                        // get return from task
+                        ret = task.GetType().GetProperty(nameof(Task<object>.Result)).GetValue(task);
+                        retType = ret.GetType();
+                    }
+                    else
+                    {
+                        // no return from task
+                        ret = null;
+                        retType = null;
+                    }
                 }
-                return true;
+                return (true, ret, retType);
             }
 
-            return false;
+            return (false, null, null);
         }
 
         #region TEMPLATE ADD METHODS
+
+        public void AddRoute<Tret>
+            (HttpMethod method, string route, Func<Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, Tret>
+            (HttpMethod method, string route, Func<T0, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, Tret>
+            (HttpMethod method, string route, Func<T0, T1, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, Tret> function)
+                => _AddRoute(method, route, function);
+
+        public void AddRoute<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, Tret>
+            (HttpMethod method, string route, Func<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, Tret> function)
+                => _AddRoute(method, route, function);
 
         public void AddRoute
             (HttpMethod method, string route, Func<Task> function)

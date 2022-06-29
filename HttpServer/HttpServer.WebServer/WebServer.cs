@@ -47,12 +47,13 @@ namespace HttpServer.WebServer
                     body = body.Append(Encoding.UTF8.GetString(buffer, 0, noBytes));
                 }
 
-                if (RouteTree.TryNavigate(
-                    new HttpMethod(ctx.Request.HttpMethod), ctx.Request.RawUrl,
-                    out object ret, out Type type,
-                    body.ToString()))
+                var res = await RouteTree.TryNavigate(new HttpMethod(ctx.Request.HttpMethod),
+                    ctx.Request.RawUrl, body.ToString());
+                object ret = res.Item2;
+                Type type = res.Item3;
+                if (res.Item1)
                 {
-                    if (ret != null)
+                    if (ret != null && type != null)
                     {
                         // send returned content
                         ResponseCode = HttpStatusCode.OK;
