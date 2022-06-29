@@ -1,4 +1,5 @@
 ﻿using HttpServer.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,16 @@ namespace HttpServer.WebServer
 {
     public class WebServer : Main.HttpServer
     {
+        private static readonly IList<Type> primitiveTypes = new List<Type>
+        {
+            typeof(decimal),
+            typeof(string),
+            typeof(DateTime),
+            typeof(DateTimeOffset),
+            typeof(TimeSpan),
+            typeof(Guid)
+        };
+
         public RouteTree RouteTree { get; private set; }
 
         /// <inheritdoc />
@@ -36,7 +47,27 @@ namespace HttpServer.WebServer
                     body = body.Append(Encoding.UTF8.GetString(buffer, 0, noBytes));
                 }
 
-                if (!RouteTree.TryNavigate(new HttpMethod(ctx.Request.HttpMethod), ctx.Request.RawUrl, body.ToString()))
+                if (RouteTree.TryNavigate(
+                    new HttpMethod(ctx.Request.HttpMethod), ctx.Request.RawUrl,
+                    out object ret, out Type type,
+                    body.ToString()))
+                {
+                    if (ret != null)
+                    {
+                        // send returned content
+                        ResponseCode = HttpStatusCode.OK;
+                        if (type.IsPrimitive || primitiveTypes.Contains(type))
+                        {
+                            await SendStringAsync(ret.ToString());
+                        }
+                        else
+                        {
+                            // serialize complex object to JSON
+                            await SendStringAsync(JsonConvert.SerializeObject(ret, type, null), "text/json");
+                        }
+                    }
+                }
+                else
                 {
                     // send 404 file
                     ResponseCode = HttpStatusCode.NotFound;

@@ -223,8 +223,10 @@ namespace HttpServer.WebServer
         /// <param name="route">The route</param>
         /// <param name="body">The request body</param>
         /// <returns>Whether the action was found</returns>
-        public bool TryNavigate(HttpMethod method, string route, string body = null)
+        public async bool TryNavigate(HttpMethod method, string route, out object ret, out Type retType, string body = null)
         {
+            ret = default;
+            retType = default;
             if (root == null)
             {
                 return false;
@@ -313,7 +315,14 @@ namespace HttpServer.WebServer
                 }
 
                 // call function
-                function.DynamicInvoke(argsList.ToArray());
+                ret = function.DynamicInvoke(argsList.ToArray());
+                retType = function.Method.ReturnType;
+                if (retType.Name == typeof(Task).Name
+                    && retType.GenericTypeArguments.Length > 0)
+                {
+                    retType = retType.GenericTypeArguments[0];
+                    ret = ((Task<int>)ret).GetAwaiter().GetResult();
+                }
                 return true;
             }
 

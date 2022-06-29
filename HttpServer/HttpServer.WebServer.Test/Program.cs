@@ -52,6 +52,11 @@ namespace HttpServer.WebServer.Test
             await ws.SendStringAsync($"Hello, {testClass.Name} ({testClass.Age}), welcome to grade {testClass.Grade}, I hope the journey from {testClass.Home} wasn't too difficult.");
         }
 
+        static async Task<int> Action_increment(int a, int b)
+        {
+            return await Task.FromResult(a + b);
+        }
+
         async static Task Main(string[] args)
         {
             //object val;
@@ -82,7 +87,9 @@ namespace HttpServer.WebServer.Test
             ws.RouteTree.AddRoute<int>(Get, "/{num:int}", Action_int);
             ws.RouteTree.AddRoute<int, string>(Get, "/hello/test/{num:int}/{str}", Action_hello_test_int_str);
             ws.RouteTree.AddRoute<string, int>(Get, "/hello/query", Action_hello_query);
-            ws.RouteTree.AddRoute<TestClass>(Get, "/greet", Action_body);
+            ws.RouteTree.AddRoute<TestClass>(Post, "/greet", Action_body);
+            ws.RouteTree.AddRoute<int, int>(Get, "/increment", Action_increment);
+            
             await ws.RunAsync(args);
 
             //List<int> nums = new List<int>();
