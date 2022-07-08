@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace HttpServer.WebServer
@@ -21,7 +22,7 @@ namespace HttpServer.WebServer
         /// <returns>If the dictionary exists and the key was found</returns>
         public static bool TryGet<T, U>(IDictionary<T, U> dict, T key, out U val, U defaultVal = default)
         {
-            if ((dict?.ContainsKey(key)).GetValueOrDefault())
+            if (key != null && (dict?.ContainsKey(key)).GetValueOrDefault())
             {
                 val = dict[key];
                 return true;
@@ -34,6 +35,22 @@ namespace HttpServer.WebServer
 
     public class RouteTree
     {
+        /// <summary>
+        /// Private class to represent a method to call
+        /// </summary>
+        private class Method
+        {
+            /// <summary>
+            /// Method information for the associated function
+            /// </summary>
+            public MethodInfo MethodInfo { get; set; }
+
+            /// <summary>
+            /// Type of class that calls this method
+            /// </summary>
+            public Type CallerType { get; set; }
+        }
+
         /// <summary>
         /// Private node class for RouteTree
         /// </summary>
@@ -52,7 +69,7 @@ namespace HttpServer.WebServer
             /// <summary>
             /// Mapping of HttpMethods to actions
             /// </summary>
-            private IDictionary<HttpMethod, Delegate> Functions { get; set; }
+            private IDictionary<HttpMethod, Method> Functions { get; set; }
 
             /// <summary>
             /// Any subroutes not requiring an argument
@@ -85,13 +102,13 @@ namespace HttpServer.WebServer
             /// </summary>
             /// <param name="key">HttpMethod</param>
             /// <param name="value">Function to associate</param>
-            public Delegate this[HttpMethod key]
+            public Method this[HttpMethod key]
             {
                 set
                 {
                     if (Functions == null)
                     {
-                        Functions = new Dictionary<HttpMethod, Delegate>();
+                        Functions = new Dictionary<HttpMethod, Method>();
                     }
 
                     Functions[key] = value;
@@ -104,7 +121,7 @@ namespace HttpServer.WebServer
             /// <param name="method">HttpMethod</param>
             /// <param name="function">Output function</param>
             /// <returns>If the action exists</returns>
-            public bool TryGetFunction(HttpMethod method, out Delegate function)
+            public bool TryGetFunction(HttpMethod method, out Method function)
                 => IDictionaryExtensions.TryGet(Functions, method, out function);
 
             /// <summary>
@@ -160,7 +177,97 @@ namespace HttpServer.WebServer
                 => IDictionaryExtensions.TryGet(ArgSubRoutes, argType, out rtn, this);
         }
 
+        /// <summary>
+        /// Root node of the tree
+        /// </summary>
         private RouteTreeNode root;
+
+        /// <summary>
+        /// Mapping between caller types and their instances
+        /// </summary>
+        private IDictionary<Type, object> callers;
+
+        /// <summary>
+        /// Register a caller in the tree
+        /// </summary>
+        /// <typeparam name="T">Type of the caller</typeparam>
+        /// <param name="caller">Caller instance</param>
+        public void RegisterCaller<T>(T caller)
+        {
+            if (callers == null)
+            {
+                callers = new Dictionary<Type, object>();
+            }
+
+            callers[typeof(T)] = caller;
+        }
+
+        /// <summary>
+        /// Add a method to the route tree
+        /// </summary>
+        /// <param name="method">Associated HTTP method with the endpoint</param>
+        /// <param name="route">Route to the endpoint</param>
+        /// <param name="caller">Caller type for the endpoint</param>
+        /// <param name="function">Function to be called for the endpoint</param>
+        public void AddRoute(HttpMethod method, string route, Type caller, MethodInfo function)
+        {
+            if (root == null)
+            {
+                root = new RouteTreeNode();
+            }
+
+            // start at root and build path to target node
+            var currentNode = root;
+            foreach (var el in route.Split('/'))
+            {
+                if (string.IsNullOrEmpty(el))
+                {
+                    continue;
+                }
+
+                RouteTreeNode nextNode = null;
+                if (el.StartsWith("{") && el.EndsWith("}"))
+                {
+                    // argument node identified by: {name:type}
+                    string typeStr = el.Substring(1, el.Length - 2);
+                    // get name
+                    int idx = typeStr.IndexOf(':');
+                    string name = string.Empty;
+                    if (idx == -1)
+                    {
+                        name = typeStr;
+                        typeStr = "string";
+                    }
+                    else
+                    {
+                        name = typeStr.Substring(0, idx);
+                        typeStr = typeStr.Substring(idx + 1);
+                    }
+                    // get type
+                    ArgType argType = ArgType.GetArgType(typeStr);
+                    nextNode = currentNode.TryGetArgSubRoute(argType.Type, out RouteTreeNode rtn)
+                        ? rtn
+                        : new RouteTreeNode(name, argType);
+                    currentNode[argType.Type] = nextNode;
+                }
+                else
+                {
+                    // plain route
+                    nextNode = currentNode.TryGetPlainSubRoute(el, out RouteTreeNode rtn)
+                        ? rtn
+                        : new RouteTreeNode();
+                    currentNode[el] = nextNode;
+                }
+                currentNode = nextNode;
+            }
+
+            // set method in endpoint
+            currentNode[method] = new Method
+            {
+                MethodInfo = function,
+                CallerType = caller
+            };
+        }
 
         private void _AddRoute(HttpMethod method, string route, Delegate function)
         {
@@ -213,7 +320,13 @@ namespace HttpServer.WebServer
                 }
                 currentNode = nextNode;
             }
-            currentNode[method] = function;
+
+            // set method in endpoint
+            currentNode[method] = new Method
+            {
+                CallerType = null,
+                MethodInfo = function.GetMethodInfo()
+            };
         }
 
         /// <summary>
@@ -274,7 +387,7 @@ namespace HttpServer.WebServer
             {
                 // place arguments in order specified by the method
                 IList<object> argsList = new List<object>();
-                foreach (var param in function.Method.GetParameters())
+                foreach (var param in function.MethodInfo.GetParameters())
                 {
                     if (routeArgs.TryGetValue(param.Name, out object value))
                     {
@@ -313,8 +426,9 @@ namespace HttpServer.WebServer
                 }
 
                 // call function
-                object ret = function.DynamicInvoke(argsList.ToArray());
-                Type retType = function.Method.ReturnType;
+                IDictionaryExtensions.TryGet(callers, function.CallerType, out object caller);
+                object ret = function.MethodInfo.Invoke(caller, argsList.ToArray());
+                Type retType = function.MethodInfo.ReturnType;
                 if (retType.IsGenericType
                     && retType.GetGenericTypeDefinition() == typeof(Task<>))
                 {

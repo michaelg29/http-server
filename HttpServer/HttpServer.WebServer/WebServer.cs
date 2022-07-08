@@ -10,6 +10,21 @@ using System.Threading.Tasks;
 
 namespace HttpServer.WebServer
 {
+    public class ControllerEndpoint : Attribute
+    {
+        public string Route { get; set; }
+        public HttpMethod Method { get; set; }
+
+        public ControllerEndpoint(string method, string route)
+        {
+            Method = new HttpMethod(method);
+            Route = route;
+        }
+    }
+
+    /// <summary>
+    /// Web server class
+    /// </summary>
     public class WebServer : Main.HttpServer
     {
         private static readonly IList<Type> primitiveTypes = new List<Type>
@@ -29,6 +44,26 @@ namespace HttpServer.WebServer
             : base(hostUrl, hostDir, logger)
         {
             RouteTree = new RouteTree();
+        }
+
+        /// <summary>
+        /// Register controller class with the web server to respond to requests
+        /// </summary>
+        /// <typeparam name="T">Type of controller</typeparam>
+        /// <param name="controller">Controller instance</param>
+        public void RegisterController<T>(T controller)
+        {
+            RouteTree.RegisterCaller(controller);
+            foreach (var method in controller.GetType().GetMethods())
+            {
+                var attr = method.GetCustomAttributes(typeof(ControllerEndpoint), true)
+                    .Select(a => a as ControllerEndpoint)
+                    .FirstOrDefault();
+                if (attr != null)
+                {
+                    RouteTree.AddRoute(attr.Method, attr.Route, typeof(T), method);
+                }
+            }
         }
 
         /// <summary>

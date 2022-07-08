@@ -23,8 +23,19 @@ namespace HttpServer.WebServer.Test
         public string Greeting { get; set; }
     }
 
+    public class Controller
+    {
+        [ControllerEndpoint("GET", "/controller/hello")]
+        public void TestEndpoint()
+        {
+            Console.WriteLine("Hello, from controller");
+        }
+    }
+
     class Program
     {
+        void test() { }
+
         static WebServer ws;
 
         static void Action_()
@@ -95,6 +106,8 @@ namespace HttpServer.WebServer.Test
             ws.RouteTree.AddRoute<string, int, int, string, TestClassGreeting>(Get, "/greet", Action_greet);
             ws.RouteTree.AddRoute<int, int>(Get, "/increment", Action_increment);
             ws.RouteTree.AddRoute<int, int, int>(Get, "/subtract", Action_subtract);
+
+            ws.RegisterController(new Controller());
 
             res = await ws.RunAsync(args);
 
