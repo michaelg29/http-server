@@ -21,7 +21,13 @@ namespace HttpServer.WebServer
             get => _server.Request;
         }
 
-        public void SetResponse(HttpStatusCode responseCode = 0,
+        /// <summary>
+        /// Set values in the HTTP response
+        /// </summary>
+        /// <param name="responseCode">Response code</param>
+        /// <param name="contentType">Content type</param>
+        /// <param name="encoding">Content encoding</param>
+        protected void SetResponse(HttpStatusCode responseCode = 0,
             string contentType = null,
             Encoding encoding = null)
         {
@@ -37,6 +43,28 @@ namespace HttpServer.WebServer
             {
                 _server.Encoding = encoding;
             }
+        }
+
+        /// <summary>
+        /// Register a configuration variable
+        /// </summary>
+        /// <param name="name">Name of variable</param>
+        /// <param name="value">Value of variable</param>
+        protected void RegisterVariable<T>(string name, T value)
+        {
+            _server.RegisterVariable(name, value);
+        }
+
+        /// <summary>
+        /// Retrieve a configuration variable
+        /// </summary>
+        /// <typeparam name="T">Type to cast to</typeparam>
+        /// <param name="name">Name of variable</param>
+        /// <param name="variable">Output variable</param>
+        /// <returns>If the variable was found</returns>
+        protected bool TryGetVariable<T>(string name, out T variable)
+        {
+            return _server.TryGetVariable(name, out variable);
         }
     }
 }
