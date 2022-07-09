@@ -23,8 +23,33 @@ namespace HttpServer.WebServer.Test
         public string Greeting { get; set; }
     }
 
+    public interface IService
+    {
+        TestClassGreeting Generate(TestClass testClass);
+    }
+
+    public class Service : IService
+    {
+        public TestClassGreeting Generate(TestClass testClass)
+        {
+            return new TestClassGreeting
+            {
+                Greeting = $"Hello, {testClass.Name} ({testClass.Age}), welcome to grade {testClass.Grade}, I hope the journey from {testClass.Home} wasn't too difficult."
+            };
+        }
+    }
+
+
     public class Controller
     {
+        private IHttpServer _server;
+        private IService _s;
+        public Controller(IHttpServer server, IService s)
+        {
+            _server = server;
+            _s = s;
+        }
+
         [ControllerEndpoint(HttpGet, "/controller/hello")]
         public void TestEndpoint()
         {
@@ -34,10 +59,13 @@ namespace HttpServer.WebServer.Test
         [ControllerEndpoint(HttpPatch, "/controller/testbody")]
         public async Task<TestClassGreeting> PatchBody(TestClass testClass)
         {
-            return await Task.FromResult(new TestClassGreeting
-            {
-                Greeting = $"Hello, {testClass.Name} ({testClass.Age}), welcome to grade {testClass.Grade}, I hope the journey from {testClass.Home} wasn't too difficult."
-            });
+            return await Task.FromResult(_s.Generate(testClass));
+        }
+
+        [ControllerEndpoint(HttpPut, "/controller/put")]
+        public async Task PutController(TestClass testClass)
+        {
+            await _server.SendStringAsync("<p>Greeting: {0}</p>", "text/html", _s.Generate(testClass).Greeting);
         }
     }
 
@@ -114,6 +142,7 @@ namespace HttpServer.WebServer.Test
             ws.RouteTree.AddRoute<int, int>(Get, "/increment", Action_increment);
             ws.RouteTree.AddRoute<int, int, int>(Get, "/subtract", Action_subtract);
 
+            ws.RegisterService<IService, Service>();
             ws.RegisterController<Controller>();
 
             res = await ws.RunAsync(args);
