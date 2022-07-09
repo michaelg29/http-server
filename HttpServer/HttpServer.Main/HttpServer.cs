@@ -71,9 +71,7 @@ namespace HttpServer.Main
         /// </summary>
         protected ILogger logger = null;
 
-        /// <summary>
-        /// Get the current request object
-        /// </summary>
+        /// <inheritdoc />
         public HttpListenerRequest Request
         {
             get => ctx.Request;
@@ -269,7 +267,7 @@ namespace HttpServer.Main
 
             // set header values
             ContentLength = content.Length;
-            if (contentType != null) ContentType = contentType;
+            if (!string.IsNullOrEmpty(contentType)) ContentType = contentType;
             Encoding = Encoding.UTF8;
 
             // send bytes
@@ -405,6 +403,12 @@ namespace HttpServer.Main
             listener.Close();
 
             return 0;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            running = false;
         }
     }
 }

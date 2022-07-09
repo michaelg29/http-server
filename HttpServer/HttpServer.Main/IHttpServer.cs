@@ -13,6 +13,14 @@ namespace HttpServer
     public interface IHttpServer
     {
         /// <summary>
+        /// Get the current request object
+        /// </summary>
+        HttpListenerRequest Request
+        {
+            get;
+        }
+
+        /// <summary>
         /// Response code for current response
         /// </summary>
         HttpStatusCode ResponseCode
@@ -64,5 +72,10 @@ namespace HttpServer
         /// <param name="args">Input arguments</param>
         /// <returns>Exit code</returns>
         Task<int> RunAsync(string[] args);
+
+        /// <summary>
+        /// Shutdown the server
+        /// </summary>
+        void Shutdown();
     }
 }
