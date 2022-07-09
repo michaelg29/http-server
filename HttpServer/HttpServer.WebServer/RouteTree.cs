@@ -440,25 +440,22 @@ namespace HttpServer.WebServer
                 }
                 object ret = function.MethodInfo.Invoke(caller, argsList.ToArray());
                 Type retType = function.MethodInfo.ReturnType;
-                if (retType.IsGenericType
+                if (retType == typeof(Task))
+                {
+                    // no return from task
+                    ret = null;
+                    retType = null;
+                }
+                else if (retType.IsGenericType
                     && retType.GetGenericTypeDefinition() == typeof(Task<>))
                 {
                     // await task completion
                     Task task = ret as Task;
                     await task.ConfigureAwait(false);
 
-                    if (retType.GetGenericArguments().Length > 0)
-                    {
-                        // get return from task
-                        ret = task.GetType().GetProperty(nameof(Task<object>.Result)).GetValue(task);
-                        retType = ret.GetType();
-                    }
-                    else
-                    {
-                        // no return from task
-                        ret = null;
-                        retType = null;
-                    }
+                    // get return from task
+                    ret = task.GetType().GetProperty(nameof(Task<object>.Result)).GetValue(task);
+                    retType = ret.GetType();
                 }
                 return (true, ret, retType);
             }
