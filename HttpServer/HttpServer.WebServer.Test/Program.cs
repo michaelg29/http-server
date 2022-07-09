@@ -74,6 +74,12 @@ namespace HttpServer.WebServer.Test
             Shutdown();
             return "Goodbye";
         }
+
+        [ControllerEndpoint(HttpGet, "/controller/startdate")]
+        public DateTimeOffset GetStartdate()
+        {
+            return TryGetVariable<DateTime>("date", out var date) ? date : DateTimeOffset.UtcNow;
+        }
     }
 
     class Program
@@ -138,6 +144,9 @@ namespace HttpServer.WebServer.Test
             int res = 0;
 
             ws = new WebServer("http://localhost:8080/", null, Logger.ConsoleLogger);
+            ws.RegisterVariable("version", 1);
+            ws.RegisterVariable("date", DateTime.UtcNow);
+
             ws.RouteTree.AddRoute(Get, "/", Action_);
             ws.RouteTree.AddRoute(Get, "/hello", Action_Hello);
             ws.RouteTree.AddRoute<int>(Get, "/{num:int}", Action_int);
