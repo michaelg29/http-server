@@ -19,6 +19,11 @@ namespace HttpServer.StaticFileServer
         public StaticFileServer(string hostUrl = null, string hostDir = null, ILogger logger = null)
             : base(hostUrl, hostDir, logger) { }
 
+        protected override async Task Startup()
+        {
+
+        }
+
         /// <summary>
         /// Process current request
         /// </summary>
