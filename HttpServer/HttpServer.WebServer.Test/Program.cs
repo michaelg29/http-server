@@ -40,19 +40,18 @@ namespace HttpServer.WebServer.Test
     }
 
 
-    public class ControllerTest
+    public class ControllerTest : Controller
     {
-        private IHttpServer _server;
         private IService _s;
-        public ControllerTest(IHttpServer server, IService s)
+        public ControllerTest(IService s)
         {
-            _server = server;
             _s = s;
         }
 
         [ControllerEndpoint(HttpGet, "/controller/hello")]
         public void TestEndpoint()
         {
+            SetResponse(responseCode: System.Net.HttpStatusCode.NoContent);
             Console.WriteLine("Hello, from controller");
         }
 
@@ -65,7 +64,15 @@ namespace HttpServer.WebServer.Test
         [ControllerEndpoint(HttpPut, "/controller/put")]
         public string PutController(TestClass testClass)
         {
+            SetResponse(contentType: "text/html");
             return string.Format("<p>Greeting: {0}</p>", _s.Generate(testClass).Greeting);
+        }
+
+        [ControllerEndpoint(HttpPost, "/controller/shutdown")]
+        public string PostShutdown()
+        {
+            Shutdown();
+            return "Goodbye";
         }
     }
 
