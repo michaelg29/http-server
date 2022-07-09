@@ -196,15 +196,15 @@ namespace HttpServer.WebServer
         /// <summary>
         /// Register a caller in the tree
         /// </summary>
-        /// <typeparam name="T">Type of the caller</typeparam>
+        /// <param name="callerType">Type of the caller</param>
         /// <param name="caller">Caller instance</param>
-        public void RegisterCaller<T>(T caller)
+        public void RegisterCaller(Type callerType, object caller)
         {
             if (callers == null)
             {
                 callers = new Dictionary<Type, object>();
             }
-            callers[typeof(T)] = caller;
+            callers[callerType] = caller;
         }
 
         /// <summary>

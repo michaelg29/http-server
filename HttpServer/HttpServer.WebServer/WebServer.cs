@@ -39,6 +39,16 @@ namespace HttpServer.WebServer
 
         public RouteTree RouteTree { get; private set; }
 
+        private IDictionary<string, object> variables;
+        private IDictionary<Type, object> services;
+
+        /// <summary>
+        /// Queue containing services to insert into dictionary
+        /// Contains elements like (Interface type, implementation type, if re-added to queue)
+        /// </summary>
+        private Queue<(Type, Type, bool)> servicesToAdd;
+        private Queue<Type> controllersToAdd;
+
         /// <inheritdoc />
         public WebServer(string hostUrl = null, string hostDir = null, ILogger logger = null)
             : base(hostUrl, hostDir, logger)
@@ -47,21 +57,166 @@ namespace HttpServer.WebServer
         }
 
         /// <summary>
+        /// Register a configuration variable
+        /// </summary>
+        /// <param name="name">Name of variable</param>
+        /// <param name="value">Value of variable</param>
+        public void RegisterVariable(string name, object value)
+        {
+            if (variables == null)
+            {
+                variables = new Dictionary<string, object>();
+            }
+
+            variables[name] = value;
+        }
+
+        /// <summary>
+        /// Register a service to be used to instantiate controllers
+        /// </summary>
+        /// <typeparam name="T">Service interface type</typeparam>
+        /// <typeparam name="U">Service implementation type</typeparam>
+        public void RegisterService<T, U>() 
+            where T : class
+            where U : T
+        {
+            if (running)
+            {
+                throw new Exception("Server already running");
+            }
+
+            if (!typeof(T).IsInterface)
+            {
+                throw new Exception($"Type {typeof(T)} must be an interface type");
+            }
+
+            if (servicesToAdd == null)
+            {
+                servicesToAdd = new Queue<(Type, Type, bool)>();
+            }
+
+            servicesToAdd.Enqueue((typeof(T), typeof(U), false));
+        }
+
+        /// <summary>
         /// Register controller class with the web server to respond to requests
         /// </summary>
         /// <typeparam name="T">Type of controller</typeparam>
-        /// <param name="controller">Controller instance</param>
-        public void RegisterController<T>(T controller)
+        public void RegisterController<T>()
         {
-            RouteTree.RegisterCaller(controller);
-            foreach (var method in controller.GetType().GetMethods())
+            if (running)
             {
-                var attr = method.GetCustomAttributes(typeof(ControllerEndpoint), true)
-                    .Select(a => a as ControllerEndpoint)
-                    .FirstOrDefault();
-                if (attr != null)
+                throw new Exception("Server already running");
+            }
+
+            if (controllersToAdd == null)
+            {
+                controllersToAdd = new Queue<Type>();
+            }
+
+            controllersToAdd.Enqueue(typeof(T));
+        }
+
+        /// <summary>
+        /// Try to instantiate an object using services and parameters registered with the server
+        /// </summary>
+        /// <param name="type">Type of object to instantiate</param>
+        /// <param name="instantiation">Instantiated object, null if unsuccessful</param>
+        /// <returns>Whether the object was instantiated</returns>
+        private bool TryInstantiateObject(Type type, out object instantiation)
+        {
+            // iterate over all constructors
+            foreach (var constructor in type.GetConstructors())
+            {
+                // synthesize list of parameters
+                IList<object> constructorParams = new List<object>();
+                bool canCall = true;
+                foreach (var param in constructor.GetParameters())
                 {
-                    RouteTree.AddRoute(attr.Method, attr.Route, typeof(T), method);
+                    // configuration variable
+                    if (variables != null &&
+                        variables.ContainsKey(param.Name) &&
+                        param.ParameterType.IsAssignableFrom(variables[param.Name].GetType()))
+                    {
+                        constructorParams.Add(variables[param.Name]);
+                    }
+
+                    // otherwise must be an interface
+                    if (!param.ParameterType.IsInterface)
+                    {
+                        throw new Exception("Service constructor parameter must be an interface type");
+                    }
+
+                    // check existing instantiations
+                    if (services.ContainsKey(param.ParameterType))
+                    {
+                        constructorParams.Add(services[param.ParameterType]);
+                    }
+
+                    canCall = false;
+                }
+
+                if (canCall)
+                {
+                    instantiation = constructor.Invoke(constructorParams.ToArray());
+                    return true;
+                }
+            }
+
+            instantiation = null;
+            return false;
+        }
+
+        /// <inheritdoc />
+        protected override async Task Startup()
+        {
+            // register services
+            services = new Dictionary<Type, object>();
+            services[typeof(IHttpServer)] = this;
+
+            while (servicesToAdd?.Count > 0)
+            {
+                var v = servicesToAdd.Dequeue();
+
+                Type interfaceType = v.Item1;
+                Type implementationType = v.Item2;
+
+                bool instantiated = TryInstantiateObject(implementationType, out object instantiation);
+                if (instantiated)
+                {
+                    services[interfaceType] = instantiation;
+                }
+                else
+                {
+                    if (v.Item3)
+                    {
+                        // do not re-add back
+                        throw new Exception($"Could not instantiate service of type {implementationType} : {interfaceType}");
+                    }
+
+                    v.Item3 = true;
+                    servicesToAdd.Enqueue(v);
+                }
+            }
+
+            // register controllers
+            while (controllersToAdd?.Count > 0)
+            {
+                // instantiate controller
+                Type controllerType = controllersToAdd.Dequeue();
+                if (TryInstantiateObject(controllerType, out object controller))
+                {
+                    RouteTree.RegisterCaller(controllerType, controller);
+                    foreach (var method in controller.GetType().GetMethods())
+                    {
+                        var attr = method.GetCustomAttributes(typeof(ControllerEndpoint), true)
+                            .Select(a => a as ControllerEndpoint)
+                            .FirstOrDefault();
+                        if (attr != null)
+                        {
+                            RouteTree.AddRoute(attr.Method, attr.Route, controllerType, method);
+                        }
+                    }
                 }
             }
         }

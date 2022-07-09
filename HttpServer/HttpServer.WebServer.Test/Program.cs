@@ -114,7 +114,7 @@ namespace HttpServer.WebServer.Test
             ws.RouteTree.AddRoute<int, int>(Get, "/increment", Action_increment);
             ws.RouteTree.AddRoute<int, int, int>(Get, "/subtract", Action_subtract);
 
-            ws.RegisterController(new Controller());
+            ws.RegisterController<Controller>();
 
             res = await ws.RunAsync(args);
 

@@ -338,6 +338,12 @@ namespace HttpServer.Main
         protected abstract Task<string> GetCommand();
 
         /// <summary>
+        /// Startup method called after starting listener
+        /// To be overridden
+        /// </summary>
+        protected abstract Task Startup();
+
+        /// <summary>
         /// Run the HTTP server
         /// </summary>
         /// <param name="args">Arguments</param>
@@ -356,11 +362,15 @@ namespace HttpServer.Main
                 listener = new HttpListener();
                 listener.Prefixes.Add(hostUrl);
                 listener.Start();
+
+                // startup callback
+                await Startup();
             }
             catch (Exception e)
             {
                 logger.Send(new Message("Failed to start server")
                     .With(e));
+                listener.Close();
                 return -1;
             }
             logger.Send($"Listening on {hostUrl}, content from {hostDir}");
