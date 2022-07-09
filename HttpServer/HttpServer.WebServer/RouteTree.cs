@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace HttpServer.WebServer
 {
+    /// <summary>
+    /// Extension methods for the IDictionary interface
+    /// </summary>
     internal static class IDictionaryExtensions
     {
         /// <summary>
@@ -33,6 +36,9 @@ namespace HttpServer.WebServer
         }
     }
 
+    /// <summary>
+    /// Class representing the route tree for the web server
+    /// </summary>
     public class RouteTree
     {
         /// <summary>
@@ -75,7 +81,7 @@ namespace HttpServer.WebServer
             /// Any subroutes not requiring an argument
             /// </summary>
             private IDictionary<string, RouteTreeNode> PlainSubRoutes { get; set; } // route => node
-            
+
             /// <summary>
             /// Any subroutes requiring an argument
             /// </summary>
@@ -198,7 +204,6 @@ namespace HttpServer.WebServer
             {
                 callers = new Dictionary<Type, object>();
             }
-
             callers[typeof(T)] = caller;
         }
 
@@ -220,6 +225,7 @@ namespace HttpServer.WebServer
             var currentNode = root;
             foreach (var el in route.Split('/'))
             {
+                // skip empty elements
                 if (string.IsNullOrEmpty(el))
                 {
                     continue;
@@ -235,6 +241,7 @@ namespace HttpServer.WebServer
                     string name = string.Empty;
                     if (idx == -1)
                     {
+                        // default argument type is string
                         name = typeStr;
                         typeStr = "string";
                     }
@@ -258,6 +265,7 @@ namespace HttpServer.WebServer
                         : new RouteTreeNode();
                     currentNode[el] = nextNode;
                 }
+                // advance pointer
                 currentNode = nextNode;
             }
 
@@ -335,7 +343,7 @@ namespace HttpServer.WebServer
         /// <param name="method">The method</param>
         /// <param name="route">The route</param>
         /// <param name="body">The request body</param>
-        /// <returns>Whether the action was found</returns>
+        /// <returns>(Whether the action was found, returned object, return type)</returns>
         public async Task<(bool, object, Type)> TryNavigate(HttpMethod method, string route, string body = null)
         {
             if (root == null)
@@ -426,7 +434,10 @@ namespace HttpServer.WebServer
                 }
 
                 // call function
-                IDictionaryExtensions.TryGet(callers, function.CallerType, out object caller);
+                if (!IDictionaryExtensions.TryGet(callers, function.CallerType, out object caller))
+                {
+                    return (false, null, null);
+                }
                 object ret = function.MethodInfo.Invoke(caller, argsList.ToArray());
                 Type retType = function.MethodInfo.ReturnType;
                 if (retType.IsGenericType

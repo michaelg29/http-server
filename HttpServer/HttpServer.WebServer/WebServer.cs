@@ -73,6 +73,7 @@ namespace HttpServer.WebServer
         {
             try
             {
+                // read body stream
                 var bodyStream = ctx.Request.InputStream;
                 var body = new StringBuilder();
                 byte[] buffer = new byte[1024];
@@ -82,13 +83,14 @@ namespace HttpServer.WebServer
                     body = body.Append(Encoding.UTF8.GetString(buffer, 0, noBytes));
                 }
 
+                // call function with endpoint
                 var res = await RouteTree.TryNavigate(new HttpMethod(ctx.Request.HttpMethod),
                     ctx.Request.RawUrl, body.ToString());
                 object ret = res.Item2;
                 Type type = res.Item3;
                 if (res.Item1)
                 {
-                    if (ret != null && type != null)
+                    if (!(ret == null || type == null))
                     {
                         // send returned content
                         ResponseCode = HttpStatusCode.OK;
@@ -101,6 +103,11 @@ namespace HttpServer.WebServer
                             // serialize complex object to JSON
                             await SendStringAsync(JsonConvert.SerializeObject(ret, type, null), "text/json");
                         }
+                    }
+                    else
+                    {
+                        // no content
+                        ResponseCode = HttpStatusCode.NoContent;
                     }
                 }
                 else

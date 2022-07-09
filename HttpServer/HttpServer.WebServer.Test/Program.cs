@@ -10,7 +10,7 @@ using static HttpServer.Main.Extensions;
 
 namespace HttpServer.WebServer.Test
 {
-    class TestClass
+    public class TestClass
     {
         public string Name { get; set; }
         public int Age { get; set; }
@@ -18,24 +18,31 @@ namespace HttpServer.WebServer.Test
         public string Home { get; set; }
     }
 
-    class TestClassGreeting
+    public class TestClassGreeting
     {
         public string Greeting { get; set; }
     }
 
     public class Controller
     {
-        [ControllerEndpoint("GET", "/controller/hello")]
+        [ControllerEndpoint(HttpGet, "/controller/hello")]
         public void TestEndpoint()
         {
             Console.WriteLine("Hello, from controller");
+        }
+
+        [ControllerEndpoint(HttpPatch, "/controller/testbody")]
+        public async Task<TestClassGreeting> PatchBody(TestClass testClass)
+        {
+            return await Task.FromResult(new TestClassGreeting
+            {
+                Greeting = $"Hello, {testClass.Name} ({testClass.Age}), welcome to grade {testClass.Grade}, I hope the journey from {testClass.Home} wasn't too difficult."
+            });
         }
     }
 
     class Program
     {
-        void test() { }
-
         static WebServer ws;
 
         static void Action_()
