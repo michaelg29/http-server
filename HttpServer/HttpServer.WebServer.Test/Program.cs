@@ -40,11 +40,11 @@ namespace HttpServer.WebServer.Test
     }
 
 
-    public class Controller
+    public class ControllerTest
     {
         private IHttpServer _server;
         private IService _s;
-        public Controller(IHttpServer server, IService s)
+        public ControllerTest(IHttpServer server, IService s)
         {
             _server = server;
             _s = s;
@@ -63,9 +63,9 @@ namespace HttpServer.WebServer.Test
         }
 
         [ControllerEndpoint(HttpPut, "/controller/put")]
-        public async Task PutController(TestClass testClass)
+        public string PutController(TestClass testClass)
         {
-            await _server.SendStringAsync("<p>Greeting: {0}</p>", "text/html", _s.Generate(testClass).Greeting);
+            return string.Format("<p>Greeting: {0}</p>", _s.Generate(testClass).Greeting);
         }
     }
 
@@ -143,7 +143,7 @@ namespace HttpServer.WebServer.Test
             ws.RouteTree.AddRoute<int, int, int>(Get, "/subtract", Action_subtract);
 
             ws.RegisterService<IService, Service>();
-            ws.RegisterController<Controller>();
+            ws.RegisterController<ControllerTest>();
 
             res = await ws.RunAsync(args);
 
