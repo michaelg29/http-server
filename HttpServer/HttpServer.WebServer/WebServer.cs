@@ -139,6 +139,7 @@ namespace HttpServer.WebServer
                         param.ParameterType.IsAssignableFrom(variables[param.Name].GetType()))
                     {
                         constructorParams.Add(variables[param.Name]);
+                        continue;
                     }
 
                     // otherwise must be an interface
@@ -151,6 +152,7 @@ namespace HttpServer.WebServer
                     if (services.ContainsKey(param.ParameterType))
                     {
                         constructorParams.Add(services[param.ParameterType]);
+                        continue;
                     }
 
                     canCall = false;
@@ -217,6 +219,10 @@ namespace HttpServer.WebServer
                             RouteTree.AddRoute(attr.Method, attr.Route, controllerType, method);
                         }
                     }
+                }
+                else
+                {
+                    throw new Exception($"Could not instantiate controller with type {controllerType}");
                 }
             }
         }
