@@ -61,7 +61,8 @@ namespace HttpServer.WebServer
         /// </summary>
         /// <param name="name">Name of variable</param>
         /// <param name="value">Value of variable</param>
-        public void RegisterVariable(string name, object value)
+        /// <inheritdoc />
+        public override void RegisterVariable<T>(string name, T value)
         {
             if (variables == null)
             {
@@ -69,6 +70,23 @@ namespace HttpServer.WebServer
             }
 
             variables[name] = value;
+        }
+
+        /// <inheritdoc />
+        public override bool TryGetVariable<T>(string name, out T variable)
+        {
+            if (variables?.ContainsKey(name) ?? false)
+            {
+                object varObj = variables[name];
+                if (varObj?.GetType().IsAssignableFrom(typeof(T)) ?? false)
+                {
+                    variable = (T)varObj;
+                    return true;
+                }
+            }
+
+            variable = default;
+            return false;
         }
 
         /// <summary>
@@ -279,6 +297,14 @@ namespace HttpServer.WebServer
                 // HTTP Exception, cannot send another file
                 ResponseCode = HttpStatusCode.InternalServerError;
                 logger.Send(e);
+            }
+            catch (System.Reflection.TargetInvocationException e)
+            {
+                // Endpoint exception, send to user
+                ResponseCode = HttpStatusCode.InternalServerError;
+                logger.Send(e.InnerException);
+                await ReadFormattedFileToResponseAsync(GetTemplatePath(errorPath),
+                    e.InnerException.GetType().ToString(), e.InnerException.Message);
             }
             catch (Exception e)
             {

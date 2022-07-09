@@ -19,10 +19,14 @@ namespace HttpServer.StaticFileServer
         public StaticFileServer(string hostUrl = null, string hostDir = null, ILogger logger = null)
             : base(hostUrl, hostDir, logger) { }
 
-        protected override async Task Startup()
-        {
+        /// <inheritdoc />
+        public override void RegisterVariable<T>(string name, T value) { }
 
-        }
+        /// <inheritdoc />
+        public override bool TryGetVariable<T>(string name, out T variable) { variable = default; return false; }
+
+        /// <inheritdoc />
+        protected override async Task Startup() { }
 
         /// <summary>
         /// Process current request

@@ -53,6 +53,22 @@ namespace HttpServer
         }
 
         /// <summary>
+        /// Register a configuration variable
+        /// </summary>
+        /// <param name="name">Name of variable</param>
+        /// <param name="value">Value of variable</param>
+        void RegisterVariable<T>(string name, T value);
+
+        /// <summary>
+        /// Retrieve a configuration variable
+        /// </summary>
+        /// <typeparam name="T">Type to cast to</typeparam>
+        /// <param name="name">Name of variable</param>
+        /// <param name="variable">Output variable</param>
+        /// <returns>If the variable was found</returns>
+        bool TryGetVariable<T>(string name, out T variable);
+
+        /// <summary>
         /// Send a file to the current response
         /// </summary>
         /// <param name="filePath">File path</param>
