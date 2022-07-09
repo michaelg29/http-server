@@ -102,7 +102,7 @@ namespace HttpServer.WebServer
         /// Register controller class with the web server to respond to requests
         /// </summary>
         /// <typeparam name="T">Type of controller</typeparam>
-        public void RegisterController<T>()
+        public void RegisterController<T>() where T : Controller
         {
             if (running)
             {
@@ -174,7 +174,6 @@ namespace HttpServer.WebServer
         {
             // register services
             services = new Dictionary<Type, object>();
-            services[typeof(IHttpServer)] = this;
 
             while (servicesToAdd?.Count > 0)
             {
@@ -206,8 +205,10 @@ namespace HttpServer.WebServer
             {
                 // instantiate controller
                 Type controllerType = controllersToAdd.Dequeue();
-                if (TryInstantiateObject(controllerType, out object controller))
+                if (TryInstantiateObject(controllerType, out object controllerObj))
                 {
+                    Controller controller = controllerObj as Controller;
+                    controller._server = this;
                     RouteTree.RegisterCaller(controllerType, controller);
                     foreach (var method in controller.GetType().GetMethods())
                     {
@@ -257,18 +258,13 @@ namespace HttpServer.WebServer
                         ResponseCode = HttpStatusCode.OK;
                         if (type.IsPrimitive || primitiveTypes.Contains(type))
                         {
-                            await SendStringAsync(ret.ToString());
+                            await SendStringAsync(ret.ToString(), ctx.Response.ContentType ?? "text");
                         }
                         else
                         {
                             // serialize complex object to JSON
                             await SendStringAsync(JsonConvert.SerializeObject(ret, type, null), "text/json");
                         }
-                    }
-                    else
-                    {
-                        // no content
-                        ResponseCode = HttpStatusCode.NoContent;
                     }
                 }
                 else
