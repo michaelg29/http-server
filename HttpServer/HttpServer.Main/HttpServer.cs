@@ -35,13 +35,6 @@ namespace HttpServer.Main
         }
 
         /// <summary>
-        /// HTML template file paths
-        /// </summary>
-        protected string errorPath = "error.html";
-        protected string notFoundPath = "notFound.html";
-        protected string dirPath = "directory.html";
-
-        /// <summary>
         /// Construct an absolute path for template files
         /// </summary>
         /// <param name="path">Template file path</param>
@@ -194,14 +187,6 @@ namespace HttpServer.Main
                 // HTTP Exception, cannot send another file
                 ResponseCode = HttpStatusCode.InternalServerError;
                 logger.Send(e);
-            }
-            catch (Exception e)
-            {
-                // General exception, send to user
-                ResponseCode = HttpStatusCode.InternalServerError;
-                logger.Send(e);
-                await ReadFormattedFileToResponseAsync(GetTemplatePath(errorPath),
-                    e.GetType().ToString(), e.Message);
             }
         }
 

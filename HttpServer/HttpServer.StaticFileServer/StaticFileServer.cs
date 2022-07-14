@@ -15,6 +15,13 @@ namespace HttpServer.StaticFileServer
     /// </summary>
     public class StaticFileServer : Main.HttpServer
     {
+        /// <summary>
+        /// HTML template file paths
+        /// </summary>
+        protected string errorPath = "error.html";
+        protected string notFoundPath = "notFound.html";
+        protected string dirPath = "directory.html";
+
         /// <inheritdoc />
         public StaticFileServer(string hostUrl = null, string hostDir = null, ILogger logger = null)
             : base(hostUrl, hostDir, logger) { }
@@ -50,57 +57,68 @@ namespace HttpServer.StaticFileServer
                 absolutePath = null;
             }
 
-            if (absolutePath != null && File.Exists(absolutePath))
+            try
             {
-                // physical file exists
-                await _SendFileAsync(absolutePath);
-            }
-            else if (absolutePath != null && Directory.Exists(absolutePath))
-            {
-                // list directory contents to user
-                string directoryList = string.Empty;
-                string fileList = string.Empty;
-
-                if (!route.EndsWith("/"))
+                if (absolutePath != null && File.Exists(absolutePath))
                 {
-                    route += "/";
+                    // physical file exists
+                    await _SendFileAsync(absolutePath);
                 }
-
-                // generate navigatable directory list
-                directoryList = string.Join("", Directory.GetDirectories(absolutePath)
-                    .Select(s =>
-                    {
-                        int idx = Math.Max(s.LastIndexOf('/'), s.LastIndexOf('\\'));
-                        string relPath = s.Substring(idx + 1);
-                        return $"\n\t\t<ul><a href=\"{route}{relPath}\">{relPath}</a></ul>";
-                    }));
-                if (route.Length > 1)
+                else if (absolutePath != null && Directory.Exists(absolutePath))
                 {
-                    // parent directory link
-                    int n = route.Length - 2;
-                    int idx = Math.Max(route.LastIndexOf('/', n), route.LastIndexOf('\\', n));
-                    string parentPath = route.Substring(0, idx + 1);
-                    directoryList += $"\n\t\t<ul><a href=\"{parentPath}\">..</a></ul>";
-                }
+                    // list directory contents to user
+                    string directoryList = string.Empty;
+                    string fileList = string.Empty;
 
-                // generate file list
-                fileList = string.Join("", Directory.GetFiles(absolutePath)
-                    .Select(s =>
+                    if (!route.EndsWith("/"))
                     {
-                        int idx = Math.Max(s.LastIndexOf('/'), s.LastIndexOf('\\'));
-                        string relPath = s.Substring(idx + 1);
-                        return $"\n\t\t<ul><a href=\"{route}{relPath}\">{relPath}</a></ul>";
-                    }));
+                        route += "/";
+                    }
 
-                // send formatted file
-                await _SendFileAsync(GetTemplatePath(dirPath),
-                    route, directoryList, fileList);
+                    // generate navigatable directory list
+                    directoryList = string.Join("", Directory.GetDirectories(absolutePath)
+                        .Select(s =>
+                        {
+                            int idx = Math.Max(s.LastIndexOf('/'), s.LastIndexOf('\\'));
+                            string relPath = s.Substring(idx + 1);
+                            return $"\n\t\t<ul><a href=\"{route}{relPath}\">{relPath}</a></ul>";
+                        }));
+                    if (route.Length > 1)
+                    {
+                        // parent directory link
+                        int n = route.Length - 2;
+                        int idx = Math.Max(route.LastIndexOf('/', n), route.LastIndexOf('\\', n));
+                        string parentPath = route.Substring(0, idx + 1);
+                        directoryList += $"\n\t\t<ul><a href=\"{parentPath}\">..</a></ul>";
+                    }
+
+                    // generate file list
+                    fileList = string.Join("", Directory.GetFiles(absolutePath)
+                        .Select(s =>
+                        {
+                            int idx = Math.Max(s.LastIndexOf('/'), s.LastIndexOf('\\'));
+                            string relPath = s.Substring(idx + 1);
+                            return $"\n\t\t<ul><a href=\"{route}{relPath}\">{relPath}</a></ul>";
+                        }));
+
+                    // send formatted file
+                    await _SendFileAsync(GetTemplatePath(dirPath),
+                        route, directoryList, fileList);
+                }
+                else
+                {
+                    // send 404 file
+                    ResponseCode = HttpStatusCode.NotFound;
+                    await _SendFileAsync(GetTemplatePath(notFoundPath));
+                }
             }
-            else
+            catch (Exception e)
             {
-                // send 404 file
-                ResponseCode = HttpStatusCode.NotFound;
-                await _SendFileAsync(GetTemplatePath(notFoundPath));
+                // General exception, send to user
+                ResponseCode = HttpStatusCode.InternalServerError;
+                logger.Send(e);
+                await ReadFormattedFileToResponseAsync(GetTemplatePath(errorPath),
+                e.GetType().ToString(), e.Message);
             }
         }
 

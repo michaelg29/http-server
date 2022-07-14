@@ -43,6 +43,13 @@ namespace HttpServer.WebServer
         private IDictionary<Type, object> services;
 
         /// <summary>
+        /// HTML template file paths
+        /// </summary>
+        protected string errorPath = "error.html";
+        protected string notFoundPath = "notFound.html";
+        protected string dirPath = "directory.html";
+
+        /// <summary>
         /// Queue containing services to insert into dictionary
         /// Contains elements like (Interface type, implementation type, if re-added to queue)
         /// </summary>
