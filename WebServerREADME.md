@@ -3,6 +3,8 @@ The web server library allows users to program custom web applications containin
 ## Usage
 ### Library files
 In your C# project, you must point to the three library files: `HttpServer.Main.dll`, `HttpServer.Logging.dll`, and `HttpServer.WebServer.dll` in the `/bin` directory.
+## Examples
+All these examples can be found in the `Examples` directory.
 ### Simple example
 ```
 using HttpServer.Logging;
