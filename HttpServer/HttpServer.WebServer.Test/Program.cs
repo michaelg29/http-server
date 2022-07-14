@@ -10,6 +10,14 @@ using static HttpServer.Main.Extensions;
 
 namespace HttpServer.WebServer.Test
 {
+    public enum Version
+    {
+        V1_0,
+        V1_1,
+        V1_2,
+        V1_3
+    }
+
     public class TestClass
     {
         public string Name { get; set; }
@@ -23,9 +31,17 @@ namespace HttpServer.WebServer.Test
         public string Greeting { get; set; }
     }
 
+    public class SystemInfo
+    {
+        public DateTimeOffset curTime;
+        public string version;
+    }
+
     public interface IService
     {
         TestClassGreeting Generate(TestClass testClass);
+
+        string GetVersionAsString(Version v);
     }
 
     public class Service : IService
@@ -37,8 +53,12 @@ namespace HttpServer.WebServer.Test
                 Greeting = $"Hello, {testClass.Name} ({testClass.Age}), welcome to grade {testClass.Grade}, I hope the journey from {testClass.Home} wasn't too difficult."
             };
         }
-    }
 
+        public string GetVersionAsString(Version v)
+        {
+            return v.ToString();
+        }
+    }
 
     public class ControllerTest : Controller
     {
@@ -79,6 +99,16 @@ namespace HttpServer.WebServer.Test
         public DateTimeOffset GetStartdate()
         {
             return TryGetVariable<DateTime>("date", out var date) ? date : DateTimeOffset.UtcNow;
+        }
+
+        [ControllerEndpoint(HttpGet, "/controller/info")]
+        public async Task<SystemInfo> GetInfo()
+        {
+            return await Task.FromResult(new SystemInfo
+            {
+                curTime = TryGetVariable("date", out DateTime dt) ? dt : DateTime.MinValue,
+                version = TryGetVariable("version", out Version v) ? _s.GetVersionAsString(v) : null
+            });
         }
     }
 
@@ -144,7 +174,7 @@ namespace HttpServer.WebServer.Test
             int res = 0;
 
             ws = new WebServer("http://localhost:8080/", null, Logger.ConsoleLogger);
-            ws.RegisterVariable("version", 1);
+            ws.RegisterVariable("version", Version.V1_0);
             ws.RegisterVariable("date", DateTime.UtcNow);
 
             ws.RouteTree.AddRoute(Get, "/", Action_);
