@@ -17,7 +17,10 @@ namespace Test
     {
         async static Task Main(string[] args)
         {
-            WebServer ws = new WebServer("http://localhost:8080", logger: Logger.ConsoleLogger);
+            WebServer ws = new WebServer(logger: Logger.ConsoleLogger, config: new WebServerConfig
+            {
+                hostUrl: "http://localhost:8080/"
+            });
 
             await ws.RunAsync();
         }
