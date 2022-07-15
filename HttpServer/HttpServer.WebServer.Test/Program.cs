@@ -111,10 +111,16 @@ namespace HttpServer.WebServer.Test
             });
         }
 
-        [ControllerEndpoint(HttpGet, "/controller/error")]
+        [ControllerEndpoint(HttpGet, "/controller/throw")]
         public void ThrowException(int code = 0, string message = null)
         {
             throw new Exception($"{code}: {message}");
+        }
+
+        [ControllerEndpoint(HttpGet, "/controller/error/{msg}")]
+        public View Error(string msg)
+        {
+            return new View("error2.html", msg.ToLower(), msg.ToUpper(), TryGetVariable("name", out string name) ? name : string.Empty);
         }
     }
 

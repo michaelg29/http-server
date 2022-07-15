@@ -299,6 +299,11 @@ namespace HttpServer.WebServer
                         {
                             await SendStringAsync(ret.ToString(), ctx.Response.ContentType ?? "text");
                         }
+                        else if (type == typeof(View))
+                        {
+                            View view = ret as View;
+                            await SendStringAsync(view.Format(), view.MimeType);
+                        }
                         else
                         {
                             // serialize complex object to JSON
