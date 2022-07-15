@@ -10,7 +10,7 @@ namespace Test
         {
             WebServer ws = new WebServer("http://localhost:8080", logger: Logger.ConsoleLogger);
 
-            await ws.RunAsync(args);
+            await ws.RunAsync();
         }
     }
 }

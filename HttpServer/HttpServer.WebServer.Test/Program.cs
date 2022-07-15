@@ -173,7 +173,10 @@ namespace HttpServer.WebServer.Test
         {
             int res = 0;
 
-            ws = new WebServer("http://localhost:8080/", null, Logger.ConsoleLogger);
+            ws = new WebServer(logger: Logger.ConsoleLogger, config: new WebServerConfig
+            {
+                HostUrl = "http://localhost:8080"
+            });
             ws.RegisterVariable("version", Version.V1_0);
             ws.RegisterVariable("date", DateTime.UtcNow);
 
@@ -191,7 +194,7 @@ namespace HttpServer.WebServer.Test
             ws.RegisterService<IService, Service>();
             ws.RegisterController<ControllerTest>();
 
-            res = await ws.RunAsync(args);
+            res = await ws.RunAsync();
 
             //List<int> nums = new List<int>();
             //for (int i = 0; i < 16; i++)

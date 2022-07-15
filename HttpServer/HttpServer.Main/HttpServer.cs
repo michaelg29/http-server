@@ -146,7 +146,11 @@ namespace HttpServer.Main
         /// <param name="logger">Logger instance, defaults to console logger</param>
         public HttpServer(string hostUrl = null, string hostDir = null, ILogger logger = null)
         {
-            this.hostUrl = hostUrl ?? "http://+:8080";
+            this.hostUrl = string.IsNullOrEmpty(hostUrl)
+                ? "http://+:8080/"
+                : hostUrl.EndsWith("/")
+                    ? hostUrl
+                    : hostUrl + "/";
             this.hostDir = string.IsNullOrEmpty(hostDir)
                 ? Directory.GetCurrentDirectory()
                 : hostDir.TrimEnd('/');
@@ -337,7 +341,7 @@ namespace HttpServer.Main
         /// </summary>
         /// <param name="args">Arguments</param>
         /// <returns>Return code: 1 if already running, -1 if exception, 0 if successful close</returns>
-        public async Task<int> RunAsync(string[] args)
+        public async Task<int> RunAsync()
         {
             if (running)
             {

@@ -87,7 +87,7 @@ namespace HttpServer
         /// </summary>
         /// <param name="args">Input arguments</param>
         /// <returns>Exit code</returns>
-        Task<int> RunAsync(string[] args);
+        Task<int> RunAsync();
 
         /// <summary>
         /// Shutdown the server

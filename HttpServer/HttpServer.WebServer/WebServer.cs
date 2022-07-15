@@ -57,10 +57,19 @@ namespace HttpServer.WebServer
         private Queue<Type> controllersToAdd;
 
         /// <inheritdoc />
+        [Obsolete("Please use the constructor taking in a WebServerConfig object instead")]
         public WebServer(string hostUrl = null, string hostDir = null, ILogger logger = null)
             : base(hostUrl, hostDir, logger)
         {
             RouteTree = new RouteTree();
+        }
+
+        public WebServer(WebServerConfig config = null, ILogger logger = null)
+            : base(config.HostUrl, config.HostDir, logger)
+        {
+            RouteTree = new RouteTree();
+            errorPath = string.IsNullOrEmpty(config?.ErrorPath) ? "error.html" : config.ErrorPath;
+            notFoundPath = string.IsNullOrEmpty(config?.NotFoundPath) ? "notFound.html" : config.NotFoundPath;
         }
 
         /// <summary>

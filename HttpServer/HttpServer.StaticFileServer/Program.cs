@@ -36,7 +36,7 @@ namespace HttpServer.StaticFileServer
             }
 
             StaticFileServer server = new StaticFileServer(hostUrl, hostDir, Logger.ConsoleLogger);
-            int res = await server.RunAsync(args);
+            int res = await server.RunAsync();
 
             Console.WriteLine($"Ended with code {res}, press any key to continue...");
             Console.ReadKey();
