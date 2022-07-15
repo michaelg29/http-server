@@ -272,6 +272,10 @@ namespace HttpServer.WebServer
         /// </summary>
         protected override async Task ProcessRequest()
         {
+            (bool, object, Type) res = (false, null, null);
+            object retObj = null;
+            Type retType = null;
+
             try
             {
                 // read body stream
@@ -285,37 +289,18 @@ namespace HttpServer.WebServer
                 }
 
                 // call function with endpoint
-                var res = await RouteTree.TryNavigate(new HttpMethod(ctx.Request.HttpMethod),
+                res = await RouteTree.TryNavigate(new HttpMethod(ctx.Request.HttpMethod),
                     ctx.Request.RawUrl, body.ToString());
-                object ret = res.Item2;
-                Type type = res.Item3;
                 if (res.Item1)
                 {
-                    if (!(ret == null || type == null))
-                    {
-                        // send returned content
-                        ResponseCode = HttpStatusCode.OK;
-                        if (type.IsPrimitive || primitiveTypes.Contains(type))
-                        {
-                            await SendStringAsync(ret.ToString(), ctx.Response.ContentType ?? "text");
-                        }
-                        else if (type == typeof(View))
-                        {
-                            View view = ret as View;
-                            await SendStringAsync(view.Format(), view.MimeType);
-                        }
-                        else
-                        {
-                            // serialize complex object to JSON
-                            await SendStringAsync(JsonConvert.SerializeObject(ret, type, null), "text/json");
-                        }
-                    }
+                    retObj = res.Item2;
+                    retType = res.Item3;
                 }
                 else
                 {
-                    // send 404 file
                     ResponseCode = HttpStatusCode.NotFound;
-                    await _SendFileAsync(GetTemplatePath(notFoundPath));
+                    retObj = new View(GetTemplatePath(notFoundPath));
+                    retType = typeof(View);
                 }
             }
             catch (HttpListenerException e)
@@ -323,22 +308,49 @@ namespace HttpServer.WebServer
                 // HTTP Exception, cannot send another file
                 ResponseCode = HttpStatusCode.InternalServerError;
                 logger.Send(e);
+                res.Item1 = false;
             }
             catch (System.Reflection.TargetInvocationException e)
             {
                 // Endpoint exception, send to user
                 ResponseCode = HttpStatusCode.InternalServerError;
                 logger.Send(e.InnerException);
-                await ReadFormattedFileToResponseAsync(GetTemplatePath(errorPath),
+                retObj = new View(GetTemplatePath(errorPath),
                     e.InnerException.GetType().ToString(), e.InnerException.Message, TryGetVariable("name", out string name) ? name : null);
+                retType = typeof(View);
             }
             catch (Exception e)
             {
                 // General exception, send to user
                 ResponseCode = HttpStatusCode.InternalServerError;
                 logger.Send(e);
-                await ReadFormattedFileToResponseAsync(GetTemplatePath(errorPath),
+                retObj = new View(GetTemplatePath(errorPath),
                     e.GetType().ToString(), e.Message, TryGetVariable("name", out string name) ? name : null);
+                retType = typeof(View);
+            }
+
+            if (!(retObj == null || retType == null))
+            {
+                // send returned content
+                ResponseCode = HttpStatusCode.OK;
+                if (retType.IsPrimitive || primitiveTypes.Contains(retType))
+                {
+                    await SendStringAsync(retObj.ToString(), ctx.Response.ContentType ?? "text");
+                }
+                else if (retType == typeof(View))
+                {
+                    View view = retObj as View;
+                    await SendStringAsync(view.Format(), view.MimeType);
+                }
+                else
+                {
+                    // serialize complex object to JSON
+                    await SendStringAsync(JsonConvert.SerializeObject(retType, retType, null), "text/json");
+                }
+            }
+            else if (res.Item1)
+            {
+                ResponseCode = HttpStatusCode.NoContent;
             }
         }
 
