@@ -27,12 +27,6 @@ namespace HttpServer.StaticFileServer
             : base(hostUrl, hostDir, logger) { }
 
         /// <inheritdoc />
-        public override void RegisterVariable<T>(string name, T value) { }
-
-        /// <inheritdoc />
-        public override bool TryGetVariable<T>(string name, out T variable) { variable = default; return false; }
-
-        /// <inheritdoc />
         protected override async Task Startup() { }
 
         /// <summary>

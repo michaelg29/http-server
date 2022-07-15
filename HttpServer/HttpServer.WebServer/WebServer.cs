@@ -25,7 +25,7 @@ namespace HttpServer.WebServer
     /// <summary>
     /// Web server class
     /// </summary>
-    public class WebServer : Main.HttpServer
+    public class WebServer : Main.HttpServer, Main.IConfigurationStore
     {
         private static readonly IList<Type> primitiveTypes = new List<Type>
         {
@@ -73,17 +73,10 @@ namespace HttpServer.WebServer
             : base(config.HostUrl, config.HostDir, logger)
         {
             RouteTree = new RouteTree();
-            errorPath = string.IsNullOrEmpty(config?.ErrorPath) ? "error.html" : config.ErrorPath;
-            notFoundPath = string.IsNullOrEmpty(config?.NotFoundPath) ? "notFound.html" : config.NotFoundPath;
         }
 
-        /// <summary>
-        /// Register a configuration variable
-        /// </summary>
-        /// <param name="name">Name of variable</param>
-        /// <param name="value">Value of variable</param>
         /// <inheritdoc />
-        public override void RegisterVariable<T>(string name, T value)
+        public void RegisterVariable<T>(string name, T value)
         {
             if (variables == null)
             {
@@ -94,7 +87,7 @@ namespace HttpServer.WebServer
         }
 
         /// <inheritdoc />
-        public override bool TryGetVariable<T>(string name, out T variable)
+        public bool TryGetVariable<T>(string name, out T variable)
         {
             if (variables?.ContainsKey(name) ?? false)
             {
@@ -108,6 +101,14 @@ namespace HttpServer.WebServer
 
             variable = default;
             return false;
+        }
+
+        /// <inheritdoc />
+        public T GetVariable<T>(string name, T defaultVal = default)
+        {
+            return TryGetVariable(name, out T ret)
+                ? ret
+                : defaultVal;
         }
 
         /// <summary>

@@ -9,7 +9,7 @@ namespace HttpServer.WebServer
 {
     public abstract class Controller
     {
-        internal IHttpServer _server { get; set; }
+        internal WebServer _server { get; set; }
 
         protected void Shutdown()
         {

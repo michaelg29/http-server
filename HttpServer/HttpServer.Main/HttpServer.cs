@@ -132,12 +132,6 @@ namespace HttpServer.Main
             }
         }
 
-        /// <inheritdoc />
-        public abstract void RegisterVariable<T>(string name, T value);
-
-        /// <inheritdoc />
-        public abstract bool TryGetVariable<T>(string name, out T variable);
-
         /// <summary>
         /// Constructor
         /// </summary>
