@@ -6,4 +6,3 @@ copy HttpServer\HttpServer.StaticFileServer\bin\Release\error.html bin
 copy HttpServer\HttpServer.StaticFileServer\bin\Release\notFound.html bin
 copy HttpServer\HttpServer.WebServer\bin\Release\HttpServer.WebServer.dll bin
 copy HttpServer\HttpServer.WebServer\bin\Release\Newtonsoft.Json.dll bin
-copy HttpServer\HttpServer.WebServer.Test\bin\Release\HttpServer.WebServer.Test.exe bin
