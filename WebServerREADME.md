@@ -32,3 +32,14 @@ This code will start the web server and tell it to listen at localhost port 8080
 ### Static Endpoints Example
 ### Controller Example
 ### Controller With Services Example
+### Custom Configuration
+```
+WebServer ws = new WebServer(logger: Logger.ConsoleLogger, config: new WebServerConfig
+{
+    HostUrl = "http://localhost:8080",
+    ErrorPath = "error2.html"
+});
+ws.RegisterVariable("name", "Web server test");
+ws.RegisterVariable("version", Version.V1_0);
+ws.RegisterVariable("date", DateTime.UtcNow);
+```
