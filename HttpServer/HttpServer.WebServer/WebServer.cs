@@ -42,12 +42,17 @@ namespace HttpServer.WebServer
         private IDictionary<string, object> variables;
         private IDictionary<Type, object> services;
 
+        private Func<HttpListenerContext, Exception, Main.IConfigurationStore, object> ExceptionHandler;
+        private Type ExceptionHandlerType;
+
+        private Func<HttpListenerContext, Main.IConfigurationStore, object> NotFoundHandler;
+        private Type NotFoundHandlerType;
+
         /// <summary>
         /// HTML template file paths
         /// </summary>
         protected string errorPath = "error.html";
         protected string notFoundPath = "notFound.html";
-        protected string dirPath = "directory.html";
 
         /// <summary>
         /// Queue containing services to insert into dictionary
@@ -268,6 +273,58 @@ namespace HttpServer.WebServer
             }
         }
 
+        public void SetExceptionHandler<T>(Func<HttpListenerContext, Exception, Main.IConfigurationStore, object> handler)
+        {
+            ExceptionHandler = handler;
+            ExceptionHandlerType = typeof(T);
+        }
+
+        public void SetNotFoundHandler<T>(Func<HttpListenerContext, Main.IConfigurationStore, object> handler)
+        {
+            NotFoundHandler = handler;
+            NotFoundHandlerType = typeof(T);
+        }
+
+        /// <summary>
+        /// Custom exception handler.
+        /// </summary>
+        /// <param name="e">Exception</param>
+        /// <param name="type">Type of object from handler</param>
+        /// <returns>Object from handler, error view if handler not defined.</returns>
+        private object HandleException(Exception e, out Type type)
+        {
+            if (ExceptionHandler == null)
+            {
+                type = typeof(View);
+                return new View(GetTemplatePath(errorPath),
+                    e.GetType().ToString(), e.Message);
+            }
+            else
+            {
+                type = ExceptionHandlerType;
+                return ExceptionHandler(ctx, e, this);
+            }
+        }
+
+        /// <summary>
+        /// Custom not found handler.
+        /// </summary>
+        /// <param name="type">Type of object form handler</param>
+        /// <returns>Object from handler, not found view if handler not defined.</returns>
+        private object HandleNotFound(out Type type)
+        {
+            if (NotFoundHandler == null)
+            {
+                type = typeof(View);
+                return new View(GetTemplatePath(notFoundPath));
+            }
+            else
+            {
+                type = NotFoundHandlerType;
+                return NotFoundHandler(ctx, this);
+            }
+        }
+
         /// <summary>
         /// Process current request
         /// </summary>
@@ -300,8 +357,7 @@ namespace HttpServer.WebServer
                 else
                 {
                     ResponseCode = HttpStatusCode.NotFound;
-                    retObj = new View(GetTemplatePath(notFoundPath));
-                    retType = typeof(View);
+                    retObj = HandleNotFound(out retType);
                 }
             }
             catch (HttpListenerException e)
@@ -316,18 +372,14 @@ namespace HttpServer.WebServer
                 // Endpoint exception, send to user
                 ResponseCode = HttpStatusCode.InternalServerError;
                 logger.Send(e.InnerException);
-                retObj = new View(GetTemplatePath(errorPath),
-                    e.InnerException.GetType().ToString(), e.InnerException.Message, TryGetVariable("name", out string name) ? name : null);
-                retType = typeof(View);
+                retObj = HandleException(e.InnerException, out retType);
             }
             catch (Exception e)
             {
                 // General exception, send to user
                 ResponseCode = HttpStatusCode.InternalServerError;
                 logger.Send(e);
-                retObj = new View(GetTemplatePath(errorPath),
-                    e.GetType().ToString(), e.Message, TryGetVariable("name", out string name) ? name : null);
-                retType = typeof(View);
+                retObj = HandleException(e, out retType);
             }
 
             if (!(retObj == null || retType == null))
@@ -341,6 +393,11 @@ namespace HttpServer.WebServer
                 else if (retType == typeof(View))
                 {
                     View view = retObj as View;
+                    // ensure correct path
+                    if (!view.Filepath.Contains(":"))
+                    {
+                        view.Filepath = AbsolutePath(view.Filepath);
+                    }
                     await SendStringAsync(view.Format(), view.MimeType);
                 }
                 else

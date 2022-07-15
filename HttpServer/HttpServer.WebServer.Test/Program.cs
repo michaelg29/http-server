@@ -1,12 +1,10 @@
 ﻿using HttpServer.Logging;
-using Newtonsoft.Json;
+using HttpServer.Main;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Http.HttpMethod;
 using static HttpServer.Main.Extensions;
+using System.Net;
 
 namespace HttpServer.WebServer.Test
 {
@@ -181,6 +179,18 @@ namespace HttpServer.WebServer.Test
             return a - b;
         }
 
+        static string ExceptionHandler(HttpListenerContext context, Exception e, IConfigurationStore config)
+        {
+            return new Message(e)
+                .With("route", context.Request.Url)
+                .ToString();
+        }
+
+        static View NotFoundHandler(HttpListenerContext context, IConfigurationStore config)
+        {
+            return new View("error2.html", "Did not find", context.Request.Url, config.GetVariable("name", string.Empty));
+        }
+
         async static Task Main(string[] args)
         {
             int res = 0;
@@ -188,7 +198,6 @@ namespace HttpServer.WebServer.Test
             ws = new WebServer(logger: Logger.ConsoleLogger, config: new WebServerConfig
             {
                 HostUrl = "http://localhost:8080",
-                ErrorPath = "error2.html"
             });
             ws.RegisterVariable("name", "Web server test");
             ws.RegisterVariable("version", Version.V1_0);
@@ -207,6 +216,9 @@ namespace HttpServer.WebServer.Test
 
             ws.RegisterService<IService, Service>();
             ws.RegisterController<ControllerTest>();
+
+            ws.SetExceptionHandler<string>(ExceptionHandler);
+            ws.SetNotFoundHandler<View>(NotFoundHandler);
 
             res = await ws.RunAsync();
 
