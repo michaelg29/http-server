@@ -64,6 +64,11 @@ namespace HttpServer.WebServer
             RouteTree = new RouteTree();
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="config">Configuration object.</param>
+        /// <param name="logger">Logger object.</param>
         public WebServer(WebServerConfig config = null, ILogger logger = null)
             : base(config.HostUrl, config.HostDir, logger)
         {
@@ -320,7 +325,7 @@ namespace HttpServer.WebServer
                 ResponseCode = HttpStatusCode.InternalServerError;
                 logger.Send(e.InnerException);
                 await ReadFormattedFileToResponseAsync(GetTemplatePath(errorPath),
-                    e.InnerException.GetType().ToString(), e.InnerException.Message);
+                    e.InnerException.GetType().ToString(), e.InnerException.Message, TryGetVariable("name", out string name) ? name : null);
             }
             catch (Exception e)
             {
@@ -328,7 +333,7 @@ namespace HttpServer.WebServer
                 ResponseCode = HttpStatusCode.InternalServerError;
                 logger.Send(e);
                 await ReadFormattedFileToResponseAsync(GetTemplatePath(errorPath),
-                    e.GetType().ToString(), e.Message);
+                    e.GetType().ToString(), e.Message, TryGetVariable("name", out string name) ? name : null);
             }
         }
 

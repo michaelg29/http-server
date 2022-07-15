@@ -110,6 +110,12 @@ namespace HttpServer.WebServer.Test
                 version = TryGetVariable("version", out Version v) ? _s.GetVersionAsString(v) : null
             });
         }
+
+        [ControllerEndpoint(HttpGet, "/controller/error")]
+        public void ThrowException(int code = 0, string message = null)
+        {
+            throw new Exception($"{code}: {message}");
+        }
     }
 
     class Program
@@ -175,8 +181,10 @@ namespace HttpServer.WebServer.Test
 
             ws = new WebServer(logger: Logger.ConsoleLogger, config: new WebServerConfig
             {
-                HostUrl = "http://localhost:8080"
+                HostUrl = "http://localhost:8080",
+                ErrorPath = "error2.html"
             });
+            ws.RegisterVariable("name", "Web server test");
             ws.RegisterVariable("version", Version.V1_0);
             ws.RegisterVariable("date", DateTime.UtcNow);
 
