@@ -61,14 +61,6 @@ namespace HttpServer.WebServer
         private Queue<(Type, Type, bool)> servicesToAdd;
         private Queue<Type> controllersToAdd;
 
-        /// <inheritdoc />
-        [Obsolete("Please use the constructor taking in a WebServerConfig object instead")]
-        public WebServer(string hostUrl = null, string hostDir = null, ILogger logger = null)
-            : base(hostUrl, hostDir, logger)
-        {
-            RouteTree = new RouteTree();
-        }
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -78,6 +70,8 @@ namespace HttpServer.WebServer
             : base(config.HostUrl, config.HostDir, logger)
         {
             RouteTree = new RouteTree();
+            services = new Dictionary<Type, object>();
+            services[typeof(ILogger)] = logger;
         }
 
         /// <inheritdoc />
@@ -218,8 +212,6 @@ namespace HttpServer.WebServer
         protected override async Task Startup()
         {
             // register services
-            services = new Dictionary<Type, object>();
-
             while (servicesToAdd?.Count > 0)
             {
                 var v = servicesToAdd.Dequeue();

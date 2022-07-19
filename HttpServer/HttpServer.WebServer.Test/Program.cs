@@ -61,9 +61,11 @@ namespace HttpServer.WebServer.Test
     public class ControllerTest : Controller
     {
         private IService _s;
-        public ControllerTest(IService s)
+        private ILogger _l;
+        public ControllerTest(IService s, ILogger l)
         {
             _s = s;
+            _l = l;
         }
 
         [ControllerEndpoint(HttpGet, "/controller/hello")]
@@ -100,8 +102,9 @@ namespace HttpServer.WebServer.Test
         }
 
         [ControllerEndpoint(HttpGet, "/controller/info")]
-        public async Task<SystemInfo> GetInfo()
+        public async Task<SystemInfo> GetInfo(string url)
         {
+            Console.WriteLine(url);
             return await Task.FromResult(new SystemInfo
             {
                 curTime = TryGetVariable("date", out DateTime dt) ? dt : DateTime.MinValue,
@@ -119,6 +122,13 @@ namespace HttpServer.WebServer.Test
         public View Error(string msg)
         {
             return new View("error2.html", msg.ToLower(), msg.ToUpper(), TryGetVariable("name", out string name) ? name : string.Empty);
+        }
+
+        [ControllerEndpoint(HttpGet, "/controller/send")]
+        public void SendMessage(string msg)
+        {
+            _l.Send(new Message("Recieved data")
+                .With("data", msg));
         }
     }
 
@@ -197,7 +207,7 @@ namespace HttpServer.WebServer.Test
 
             ws = new WebServer(logger: Logger.ConsoleLogger, config: new WebServerConfig
             {
-                HostUrl = "http://localhost:8080",
+                HostUrl = "http://+:8080",
             });
             ws.RegisterVariable("name", "Web server test");
             ws.RegisterVariable("version", Version.V1_0);
