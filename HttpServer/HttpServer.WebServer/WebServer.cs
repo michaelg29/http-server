@@ -392,6 +392,11 @@ namespace HttpServer.WebServer
                     }
                     await SendStringAsync(view.Format(), view.MimeType);
                 }
+                else if (retType == typeof(HttpResponseMessage))
+                {
+                    HttpResponseMessage response = retObj as HttpResponseMessage;
+                    await SendResponseAsync(response);
+                }
                 else
                 {
                     // serialize complex object to JSON

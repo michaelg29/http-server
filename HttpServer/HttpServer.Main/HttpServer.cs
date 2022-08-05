@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -261,6 +262,31 @@ namespace HttpServer.Main
             byte[] buffer = Encoding.UTF8.GetBytes(content);
             await ctx.Response.OutputStream.WriteAsync(buffer, 0, content.Length);
             await ctx.Response.OutputStream.FlushAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task SendResponseAsync(HttpResponseMessage responseMessage)
+        {
+            // set status code
+            ResponseCode = responseMessage.StatusCode;
+
+            // set headers
+            foreach (var header in responseMessage.Headers)
+            {
+                ctx.Response.Headers.Add(header.Key, string.Join(",", header.Value));
+            }
+
+            // set content headers
+            ContentLength = responseMessage.Content.Headers.ContentLength.GetValueOrDefault(0);
+            ContentType = responseMessage.Content.Headers.ContentType.MediaType;
+            if (responseMessage.Content.Headers.ContentEncoding?.Count > 0)
+            {
+                Encoding = Encoding.GetEncoding(responseMessage.Content.Headers.ContentEncoding.ElementAt(0));
+            }
+
+            // copy content
+            var inputStream = await responseMessage.Content.ReadAsStreamAsync();
+            await inputStream.CopyToAsync(ctx.Response.OutputStream);
         }
 
         /// <summary>

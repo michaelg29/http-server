@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using static System.Net.Http.HttpMethod;
 using static HttpServer.Main.Extensions;
 using System.Net;
+using System.Net.Http;
 
 namespace HttpServer.WebServer.Test
 {
@@ -66,6 +67,15 @@ namespace HttpServer.WebServer.Test
         {
             _s = s;
             _l = l;
+        }
+
+        [ControllerEndpoint(HttpGet, "/controller/header")]
+        public HttpResponseMessage TestMsg()
+        {
+            HttpResponseMessage msg = new HttpResponseMessage(HttpStatusCode.OK);
+            msg.Content = new StringContent("{\"hello\":15}", System.Text.Encoding.UTF8, "text/json");
+            msg.Headers.Add("test", Request.Headers.Get("token"));
+            return msg;
         }
 
         [ControllerEndpoint(HttpGet, "/controller/hello")]

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -65,6 +66,12 @@ namespace HttpServer
         /// <param name="content">String content</param>
         /// <param name="args">Formatting arguments</param>
         Task SendStringAsync(string content, string contentType, params string[] args);
+
+        /// <summary>
+        /// Send http response
+        /// </summary>
+        /// <param name="responseMessage">Response message</param>
+        Task SendResponseAsync(HttpResponseMessage responseMessage);
 
         /// <summary>
         /// Run the server
