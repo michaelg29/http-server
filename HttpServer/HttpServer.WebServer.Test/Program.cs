@@ -232,17 +232,6 @@ namespace HttpServer.WebServer.Test
 
             res = await ws.RunAsync();
 
-            //List<int> nums = new List<int>();
-            //for (int i = 0; i < 16; i++)
-            //{
-            //    nums.Add(i);
-            //    string str = $@"        public void AddRoute<{string.Join(", ", nums.Select(n => $"T{n}"))}, Tret>
-            //(HttpMethod method, string route, Func<{string.Join(", ", nums.Select(n => $"T{n}"))}, Tret> function)
-            //    => _AddRoute(method, route, function);";
-
-            //    Console.WriteLine(str + Environment.NewLine);
-            //}
-
             Console.WriteLine($"Ended with code {res}, press any key to continue...");
             Console.ReadKey();
         }
