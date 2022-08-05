@@ -20,4 +20,5 @@ This library allows users to create custom web apps or APIs. See the file WebSer
 
 # Troubleshooting
 * If you get the error: `Access is denied` when trying to start, you must allow the program through the firewall along with the specific port.
-    * Also run the following command in a powershell session with administrator permissions: ` netsh http add urlacl url=http://+:8008/ user=Everyone listen=yes`
+    * Also run the following command in a powershell session with administrator permissions: `netsh http add urlacl url=http://+:8080/ user=Everyone listen=yes`
+    * You can also try running either Visual Studio as an administrator or the executable as an adminstrator, though you cannot debug it in the latter way.
