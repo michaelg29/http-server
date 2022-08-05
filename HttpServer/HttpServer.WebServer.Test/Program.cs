@@ -207,7 +207,7 @@ namespace HttpServer.WebServer.Test
 
             ws = new WebServer(logger: Logger.ConsoleLogger, config: new WebServerConfig
             {
-                HostUrl = "http://+:8080",
+                HostUrl = "http://+:8080;https://+:8443",
             });
             ws.RegisterVariable("name", "Web server test");
             ws.RegisterVariable("version", Version.V1_0);

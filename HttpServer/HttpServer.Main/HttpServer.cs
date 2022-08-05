@@ -142,9 +142,7 @@ namespace HttpServer.Main
         {
             this.hostUrl = string.IsNullOrEmpty(hostUrl)
                 ? "http://+:8080/"
-                : hostUrl.EndsWith("/")
-                    ? hostUrl
-                    : hostUrl + "/";
+                : hostUrl;
             this.hostDir = string.IsNullOrEmpty(hostDir)
                 ? Directory.GetCurrentDirectory()
                 : hostDir.TrimEnd('/');
@@ -347,7 +345,17 @@ namespace HttpServer.Main
             {
                 // create and bind listener
                 listener = new HttpListener();
-                listener.Prefixes.Add(hostUrl);
+                foreach (var url in hostUrl.Split(';'))
+                {
+                    if (!url.EndsWith("/"))
+                    {
+                        listener.Prefixes.Add(url + "/");
+                    }
+                    else
+                    {
+                        listener.Prefixes.Add(url);
+                    }
+                }
                 listener.Start();
 
                 // startup callback
