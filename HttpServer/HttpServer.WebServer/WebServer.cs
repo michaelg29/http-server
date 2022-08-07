@@ -330,17 +330,36 @@ namespace HttpServer.WebServer
             {
                 // read body stream
                 var bodyStream = ctx.Request.InputStream;
-                var body = new StringBuilder();
-                byte[] buffer = new byte[1024];
-                int noBytes;
-                while ((noBytes = bodyStream.Read(buffer, 0, buffer.Length)) > 0)
+                string bodyStr = null;
+
+                // parse body stream
+                IDictionary<string, string> formParams = null;
+                if (ctx.Request.ContentType == "multipart/form-data")
                 {
-                    body = body.Append(Encoding.UTF8.GetString(buffer, 0, noBytes));
+                }
+                else
+                {
+                    var body = new StringBuilder();
+                    byte[] buffer = new byte[1024];
+                    int noBytes;
+                    while ((noBytes = bodyStream.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        body = body.Append((Request.ContentEncoding ?? Encoding.UTF8).GetString(buffer, 0, noBytes));
+                    }
+
+                    if (ctx.Request.ContentType == "application/x-www-form-urlencoded")
+                    {
+                        formParams = body.ToString().ParseAsQuery();
+                    }
+                    else if (ctx.Request.ContentType.Contains("text"))
+                    {
+                        bodyStr = body.ToString();
+                    }
                 }
 
                 // call function with endpoint
                 res = await RouteTree.TryNavigate(new HttpMethod(ctx.Request.HttpMethod),
-                    ctx.Request.RawUrl, body.ToString());
+                    ctx.Request.RawUrl, bodyStr, formParams);
                 if (res.Item1)
                 {
                     retObj = res.Item2;

@@ -34,6 +34,30 @@ namespace HttpServer.WebServer
             val = defaultVal;
             return false;
         }
+
+        /// <summary>
+        /// Parse a string as a query string with escaped characters
+        /// </summary>
+        /// <param name="str">The string to parse</param>
+        /// <returns>The query parameters in dictionary form</returns>
+        public static IDictionary<string, string> ParseAsQuery(this string str)
+        {
+            IDictionary<string, string> query = new Dictionary<string, string>();
+
+            string[] paramArr = str.Split('&');
+            foreach (string paramStr in paramArr)
+            {
+                string[] splitParam = paramStr.Split('=');
+                if (splitParam.Length != 2)
+                {
+                    continue;
+                }
+                query[Uri.UnescapeDataString(splitParam[0])]
+                    = Uri.UnescapeDataString(splitParam[1]);
+            }
+
+            return query;
+        }
     }
 
     /// <summary>
@@ -344,7 +368,7 @@ namespace HttpServer.WebServer
         /// <param name="route">The route</param>
         /// <param name="body">The request body</param>
         /// <returns>(Whether the action was found, returned object, return type)</returns>
-        public async Task<(bool, object, Type)> TryNavigate(HttpMethod method, string route, string body = null)
+        public async Task<(bool, object, Type)> TryNavigate(HttpMethod method, string route, string body = null, IDictionary<string, string> extraParams = null)
         {
             if (root == null)
             {
@@ -352,17 +376,26 @@ namespace HttpServer.WebServer
             }
 
             // parse query parameters
-            IDictionary<string, string> queryParams = new Dictionary<string, string>();
+            IDictionary<string, string> queryParams = null;
             int paramIdx = route.IndexOf('?');
             if (paramIdx != -1)
             {
-                string[] paramArr = route.Substring(paramIdx + 1).Split('&');
+                queryParams = route.Substring(paramIdx + 1).ParseAsQuery();
                 route = route.Substring(0, paramIdx);
-                foreach (string paramStr in paramArr)
+            }
+
+            if (extraParams != null)
+            {
+                if (queryParams == null)
                 {
-                    string[] splitParam = paramStr.Split('=');
-                    queryParams[Uri.UnescapeDataString(splitParam[0])]
-                        = Uri.UnescapeDataString(splitParam[1]);
+                    queryParams = extraParams;
+                }
+                else
+                {
+                    foreach (var kvp in extraParams)
+                    {
+                        queryParams[kvp.Key] = kvp.Value;
+                    }
                 }
             }
 
