@@ -1,7 +1,9 @@
 ﻿using HttpServer.Logging;
+using HttpServer.Main;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -21,6 +23,29 @@ namespace HttpServer.WebServer
             Route = route;
         }
     }
+
+    public class MultipartFormData
+    {
+        public string ContentDisposition { get; set; }
+
+        public string ContentType { get; set; }
+
+        public string ContentLength { get; set; }
+
+        public string Name { get; set; }
+
+        public string FileName { get; set; }
+
+        public byte[] Content { get; set; }
+
+        internal Encoding encoding;
+
+        public override string ToString()
+        {
+            return encoding.GetString(Content);
+        }
+    }
+
 
     /// <summary>
     /// Web server class
@@ -317,6 +342,99 @@ namespace HttpServer.WebServer
             }
         }
 
+        const string BOUNDARY_MARKER = "boundary=";
+        public ICollection<MultipartFormData> FormDataContent { get; private set; }
+
+        private static string GetHeader(List<byte> bytes, int length, int startIdx, Encoding encoding, byte[] terminator)
+        {
+            if (bytes.TryIndexOf(length, terminator, out int idx, startIdx))
+            {
+                return encoding.GetString(bytes.GetRange(startIdx, idx - startIdx).ToArray());
+            }
+            return null;
+        }
+
+        private static MultipartFormData ParseMultipartFormData(List<byte> bytes, int startIdx, int endIdx, Encoding encoding)
+        {
+            MultipartFormData data = new MultipartFormData
+            {
+                encoding = encoding
+            };
+            int length = endIdx - startIdx;
+
+            byte[] dispositionBytes = encoding.GetBytes("Content-Disposition: ");
+            byte[] nameBytes = encoding.GetBytes("name=\"");
+            byte[] filenameBytes = encoding.GetBytes("filename=\"");
+            byte[] contentTypeBytes = encoding.GetBytes("Content-Type: ");
+            byte[] quoteByte = encoding.GetBytes("\"");
+            byte[] semicolonByte = encoding.GetBytes(";");
+            byte[] newLineByte = encoding.GetBytes("\n");
+            byte[] bodySepBytes = encoding.GetBytes("\r\n\r\n");
+
+            // read headers
+            int headerStartIdx = 0;
+            if (bytes.TryIndexOf(length, dispositionBytes, out headerStartIdx, startIdx))
+            {
+                data.ContentDisposition = GetHeader(bytes, length, headerStartIdx + dispositionBytes.Length, encoding, semicolonByte);
+            }
+            if (bytes.TryIndexOf(length, nameBytes, out headerStartIdx, startIdx))
+            {
+                data.Name = GetHeader(bytes, length, headerStartIdx + nameBytes.Length, encoding, quoteByte);
+            }
+            if (bytes.TryIndexOf(length, filenameBytes, out headerStartIdx, startIdx))
+            {
+                data.FileName = GetHeader(bytes, length, headerStartIdx + filenameBytes.Length, encoding, quoteByte);
+            }
+            if (bytes.TryIndexOf(length, contentTypeBytes, out headerStartIdx, startIdx))
+            {
+                data.ContentType = GetHeader(bytes, length, headerStartIdx + contentTypeBytes.Length, encoding, newLineByte);
+            }
+
+            // read body
+            if (bytes.TryIndexOf(length, bodySepBytes, out int bodyStartIdx, startIdx))
+            {
+                data.Content = bytes.GetRange(bodyStartIdx + bodySepBytes.Length, endIdx - bodyStartIdx - bodySepBytes.Length - 2).ToArray();
+            }
+
+            return data;
+        }
+
+        private void ParseMultipartForm(Stream stream, string boundary, Encoding encoding)
+        {
+            FormDataContent = new List<MultipartFormData>();
+
+            boundary = "--" + boundary;
+            byte[] boundaryBytes = encoding.GetBytes(boundary);
+            int boundaryLength = boundary.Length;
+
+            List<byte> bytes = new List<byte>();
+            byte[] buffer = new byte[1024];
+            int idx = 0;
+            int startIdx = -1;
+            while (stream.Read(buffer, 0, buffer.Length) > 0)
+            {
+                bytes.AddRange(buffer);
+                while ((idx = bytes.IndexOf(bytes.Count, boundaryBytes, Math.Max(startIdx, 0))) > -1)
+                {
+                    if (startIdx > -1)
+                    {
+                        // found end
+                        FormDataContent.Add(ParseMultipartFormData(bytes, startIdx, idx, encoding));
+
+                        // prepare to read next form element
+                        bytes.RemoveRange(0, idx + boundaryLength);
+                        startIdx = 0;
+                    }
+                    else
+                    {
+                        // found start
+                        startIdx = idx + boundaryLength;
+                    }
+                }
+            }
+            bytes.Clear();
+        }
+
         /// <summary>
         /// Process current request
         /// </summary>
@@ -326,34 +444,48 @@ namespace HttpServer.WebServer
             object retObj = null;
             Type retType = null;
 
+            FormDataContent = null;
             try
             {
                 // read body stream
                 var bodyStream = ctx.Request.InputStream;
                 string bodyStr = null;
-
-                // parse body stream
                 IDictionary<string, string> formParams = null;
-                if (ctx.Request.ContentType == "multipart/form-data")
-                {
-                }
-                else
-                {
-                    var body = new StringBuilder();
-                    byte[] buffer = new byte[1024];
-                    int noBytes;
-                    while ((noBytes = bodyStream.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        body = body.Append((Request.ContentEncoding ?? Encoding.UTF8).GetString(buffer, 0, noBytes));
-                    }
 
-                    if (ctx.Request.ContentType == "application/x-www-form-urlencoded")
+                if (bodyStream != null)
+                {
+                    // parse body stream
+                    Console.WriteLine(ctx.Request.ContentType);
+                    if (ctx.Request.ContentType?.Contains("multipart/form-data") == true)
                     {
-                        formParams = body.ToString().ParseAsQuery();
+                        // get separator
+                        int idx = ctx.Request.ContentType.IndexOf(BOUNDARY_MARKER);
+                        if (idx >= 0)
+                        {
+                            idx += BOUNDARY_MARKER.Length;
+                        }
+                        ParseMultipartForm(bodyStream, ctx.Request.ContentType.Substring(idx), Request.ContentEncoding ?? Encoding.UTF8);
                     }
-                    else if (ctx.Request.ContentType.Contains("text"))
+                    else
                     {
-                        bodyStr = body.ToString();
+                        var body = new StringBuilder();
+                        byte[] buffer = new byte[1024];
+                        int noBytes;
+                        while ((noBytes = bodyStream.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            body = body.Append((Request.ContentEncoding ?? Encoding.UTF8).GetString(buffer, 0, noBytes));
+                        }
+
+                        Console.WriteLine(body.ToString());
+
+                        if (ctx.Request.ContentType == "application/x-www-form-urlencoded")
+                        {
+                            formParams = body.ToString().ParseAsQuery();
+                        }
+                        else if (ctx.Request.ContentType?.Contains("text") == true)
+                        {
+                            bodyStr = body.ToString();
+                        }
                     }
                 }
 

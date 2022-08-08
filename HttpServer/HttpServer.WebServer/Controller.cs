@@ -66,5 +66,12 @@ namespace HttpServer.WebServer
         {
             return _server.TryGetVariable(name, out variable);
         }
+
+        protected MultipartFormData GetFormData(string name)
+        {
+            return _server.FormDataContent
+                .Where(c => c.Name == name)
+                .FirstOrDefault();
+        }
     }
 }
