@@ -384,6 +384,7 @@ namespace HttpServer.WebServer
                 route = route.Substring(0, paramIdx);
             }
 
+            // insert extra parameters
             if (extraParams != null)
             {
                 if (queryParams == null)
@@ -397,6 +398,12 @@ namespace HttpServer.WebServer
                         queryParams[kvp.Key] = kvp.Value;
                     }
                 }
+            }
+
+            // null check in case of failure
+            if (queryParams == null)
+            {
+                queryParams = new Dictionary<string, string>();
             }
 
             // parse route parameters while traversing the tree to find the action
