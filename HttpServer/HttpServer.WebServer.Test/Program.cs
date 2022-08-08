@@ -4,6 +4,7 @@ using System;
 using System.Threading.Tasks;
 using static System.Net.Http.HttpMethod;
 using static HttpServer.Main.Extensions;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 
@@ -139,6 +140,27 @@ namespace HttpServer.WebServer.Test
         {
             _l.Send(new Message("Recieved data")
                 .With("data", msg));
+        }
+
+        [ControllerEndpoint(HttpPost, "/controller/form")]
+        public void ParseForm(string name, string grade, string password, string url)
+        {
+            Console.WriteLine($"name {name}, grade {grade}, password {password}, url {url}");
+        }
+
+        [ControllerEndpoint(HttpPost, "/controller/multipart")]
+        public void MultipartForm()
+        {
+            Console.WriteLine(GetFormData("dsaffsd").ToString());
+        }
+
+        [ControllerEndpoint(HttpPost, "/controller/upload")]
+        public void UploadFile()
+        {
+            var formData = GetFormData("file");
+            var file = File.Open(formData.FileName, FileMode.OpenOrCreate);
+            file.Write(formData.Content, 0, formData.Content.Length);
+            file.Close();
         }
     }
 
