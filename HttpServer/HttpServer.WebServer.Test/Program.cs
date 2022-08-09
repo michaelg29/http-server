@@ -154,10 +154,16 @@ namespace HttpServer.WebServer.Test
             Console.WriteLine(GetFormData("dsaffsd").ToString());
         }
 
+        [ControllerEndpoint(HttpGet, "/controller/upload")]
+        public View GetFileForm()
+        {
+            return new View("file.html");
+        }
+
         [ControllerEndpoint(HttpPost, "/controller/upload")]
         public void UploadFile()
         {
-            var formData = GetFormData("file");
+            var formData = GetFormData("filename");
             var file = File.Open(formData.FileName, FileMode.OpenOrCreate);
             file.Write(formData.Content, 0, formData.Content.Length);
             file.Close();

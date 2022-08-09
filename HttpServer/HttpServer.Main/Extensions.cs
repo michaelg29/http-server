@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 
 namespace HttpServer.Main
@@ -30,7 +31,7 @@ namespace HttpServer.Main
 
         public static int IndexOf(this IList<byte> buffer, int len, byte[] target, int startIdx = 0)
         {
-            int upperBound = len - target.Length + startIdx;
+            int upperBound = Math.Min(len + startIdx, buffer.Count) - target.Length;
             for (int i = startIdx; i < upperBound; i++)
             {
                 int skip = 0;

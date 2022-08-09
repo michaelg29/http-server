@@ -401,17 +401,23 @@ namespace HttpServer.WebServer
 
         private void ParseMultipartForm(Stream stream, string boundary, Encoding encoding)
         {
+            FileStream file = File.OpenWrite("multipart-form");
+            stream.CopyTo(file);
+            file.Close();
+
             FormDataContent = new List<MultipartFormData>();
 
             boundary = "--" + boundary;
             byte[] boundaryBytes = encoding.GetBytes(boundary);
             int boundaryLength = boundary.Length;
 
+            file = File.OpenRead("multipart-form");
+
             List<byte> bytes = new List<byte>();
             byte[] buffer = new byte[1024];
             int idx = 0;
             int startIdx = -1;
-            while (stream.Read(buffer, 0, buffer.Length) > 0)
+            while (file.Read(buffer, 0, buffer.Length) > 0)
             {
                 bytes.AddRange(buffer);
                 while ((idx = bytes.IndexOf(bytes.Count, boundaryBytes, Math.Max(startIdx, 0))) > -1)
