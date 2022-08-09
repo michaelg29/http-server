@@ -45,10 +45,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgType.cs" />
+    <Compile Include="Content\MultipartForm.cs" />
+    <Compile Include="Content\View.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RouteTree.cs" />
-    <Compile Include="View.cs" />
     <Compile Include="WebServer.cs" />
     <Compile Include="WebServerConfig.cs" />
   </ItemGroup>

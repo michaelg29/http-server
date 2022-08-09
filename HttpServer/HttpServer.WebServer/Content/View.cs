@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HttpServer.WebServer
+namespace HttpServer.WebServer.Content
 {
     /// <summary>
     /// Class representing a file to be sent as a response.

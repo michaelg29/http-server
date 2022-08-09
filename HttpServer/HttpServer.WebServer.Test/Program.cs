@@ -1,5 +1,6 @@
 ﻿using HttpServer.Logging;
 using HttpServer.Main;
+using HttpServer.WebServer.Content;
 using System;
 using System.Threading.Tasks;
 using static System.Net.Http.HttpMethod;

@@ -1,4 +1,5 @@
 ﻿using HttpServer.Logging;
+using HttpServer.WebServer.Content;
 using HttpServer.Main;
 using Newtonsoft.Json;
 using System;
@@ -23,29 +24,6 @@ namespace HttpServer.WebServer
             Route = route;
         }
     }
-
-    public class MultipartFormData
-    {
-        public string ContentDisposition { get; set; }
-
-        public string ContentType { get; set; }
-
-        public string ContentLength { get; set; }
-
-        public string Name { get; set; }
-
-        public string FileName { get; set; }
-
-        public byte[] Content { get; set; }
-
-        internal Encoding encoding;
-
-        public override string ToString()
-        {
-            return encoding.GetString(Content);
-        }
-    }
-
 
     /// <summary>
     /// Web server class
@@ -358,7 +336,7 @@ namespace HttpServer.WebServer
         {
             MultipartFormData data = new MultipartFormData
             {
-                encoding = encoding
+                Encoding = encoding
             };
             int length = endIdx - startIdx;
 
