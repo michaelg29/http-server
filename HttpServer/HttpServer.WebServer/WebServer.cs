@@ -321,102 +321,60 @@ namespace HttpServer.WebServer
         }
 
         const string BOUNDARY_MARKER = "boundary=";
-        public ICollection<MultipartFormData> FormDataContent { get; private set; }
+        private MultipartForm _FormData { get; set; }
+        private Task<MultipartForm> FormDataTask { get; set; }
 
-        private static string GetHeader(List<byte> bytes, int length, int startIdx, Encoding encoding, byte[] terminator)
+        public async Task<MultipartForm> GetMultipartForm()
         {
-            if (bytes.TryIndexOf(length, terminator, out int idx, startIdx))
+            if (_FormData != null)
             {
-                return encoding.GetString(bytes.GetRange(startIdx, idx - startIdx).ToArray());
+                return _FormData;
             }
+
+            if (FormDataTask != null)
+            {
+                _FormData = await FormDataTask;
+                FormDataTask = null;
+                return _FormData;
+            }
+
             return null;
         }
 
-        private static MultipartFormData ParseMultipartFormData(List<byte> bytes, int startIdx, int endIdx, Encoding encoding)
+        public async Task<MultipartFormData> GetMultipartFormData(string name)
         {
-            MultipartFormData data = new MultipartFormData
-            {
-                Encoding = encoding
-            };
-            int length = endIdx - startIdx;
-
-            byte[] dispositionBytes = encoding.GetBytes("Content-Disposition: ");
-            byte[] nameBytes = encoding.GetBytes("name=\"");
-            byte[] filenameBytes = encoding.GetBytes("filename=\"");
-            byte[] contentTypeBytes = encoding.GetBytes("Content-Type: ");
-            byte[] quoteByte = encoding.GetBytes("\"");
-            byte[] semicolonByte = encoding.GetBytes(";");
-            byte[] newLineByte = encoding.GetBytes("\n");
-            byte[] bodySepBytes = encoding.GetBytes("\r\n\r\n");
-
-            // read headers
-            int headerStartIdx = 0;
-            if (bytes.TryIndexOf(length, dispositionBytes, out headerStartIdx, startIdx))
-            {
-                data.ContentDisposition = GetHeader(bytes, length, headerStartIdx + dispositionBytes.Length, encoding, semicolonByte);
-            }
-            if (bytes.TryIndexOf(length, nameBytes, out headerStartIdx, startIdx))
-            {
-                data.Name = GetHeader(bytes, length, headerStartIdx + nameBytes.Length, encoding, quoteByte);
-            }
-            if (bytes.TryIndexOf(length, filenameBytes, out headerStartIdx, startIdx))
-            {
-                data.FileName = GetHeader(bytes, length, headerStartIdx + filenameBytes.Length, encoding, quoteByte);
-            }
-            if (bytes.TryIndexOf(length, contentTypeBytes, out headerStartIdx, startIdx))
-            {
-                data.ContentType = GetHeader(bytes, length, headerStartIdx + contentTypeBytes.Length, encoding, newLineByte);
-            }
-
-            // read body
-            if (bytes.TryIndexOf(length, bodySepBytes, out int bodyStartIdx, startIdx))
-            {
-                data.Content = bytes.GetRange(bodyStartIdx + bodySepBytes.Length, endIdx - bodyStartIdx - bodySepBytes.Length - 2).ToArray();
-            }
-
-            return data;
+            var form = await GetMultipartForm();
+            return form.Data.Where(d => d.Name == name).FirstOrDefault();
         }
 
-        private void ParseMultipartForm(Stream stream, string boundary, Encoding encoding)
+        public async Task<byte[]> GetMultipartFormBuffer(string name)
         {
-            FileStream file = File.OpenWrite("multipart-form");
-            stream.CopyTo(file);
+            byte[] buffer = null;
+            var form = await GetMultipartForm();
+
+            FileStream file = File.OpenRead(form.DataFile);
+            var formData = form.Data.Where(d => d.Name == name).FirstOrDefault();
+            file.Seek(formData.StartIdx, SeekOrigin.Begin);
+            buffer = new byte[formData.Length];
+            await file.ReadAsync(buffer, 0, formData.Length);
             file.Close();
 
-            FormDataContent = new List<MultipartFormData>();
+            return buffer;
+        }
 
-            boundary = "--" + boundary;
-            byte[] boundaryBytes = encoding.GetBytes(boundary);
-            int boundaryLength = boundary.Length;
+        public async Task<string> GetMultipartFormString(string name)
+        {
+            byte[] buffer = null;
+            var form = await GetMultipartForm();
 
-            file = File.OpenRead("multipart-form");
+            FileStream file = File.OpenRead(form.DataFile);
+            var formData = form.Data.Where(d => d.Name == name).FirstOrDefault();
+            file.Seek(formData.StartIdx, SeekOrigin.Begin);
+            buffer = new byte[formData.Length];
+            await file.ReadAsync(buffer, 0, formData.Length);
+            file.Close();
 
-            List<byte> bytes = new List<byte>();
-            byte[] buffer = new byte[1024];
-            int idx = 0;
-            int startIdx = -1;
-            while (file.Read(buffer, 0, buffer.Length) > 0)
-            {
-                bytes.AddRange(buffer);
-                while ((idx = bytes.IndexOf(bytes.Count, boundaryBytes, Math.Max(startIdx, 0))) > -1)
-                {
-                    if (startIdx > -1)
-                    {
-                        // found end
-                        FormDataContent.Add(ParseMultipartFormData(bytes, startIdx, idx, encoding));
-
-                        // prepare to read next form element
-                        bytes.RemoveRange(0, idx + boundaryLength);
-                        startIdx = 0;
-                    }
-                    else
-                    {
-                        // found start
-                        startIdx = idx + boundaryLength;
-                    }
-                }
-            }
-            bytes.Clear();
+            return form.Encoding.GetString(buffer);
         }
 
         /// <summary>
@@ -428,7 +386,6 @@ namespace HttpServer.WebServer
             object retObj = null;
             Type retType = null;
 
-            FormDataContent = null;
             try
             {
                 // read body stream
@@ -448,7 +405,8 @@ namespace HttpServer.WebServer
                         {
                             idx += BOUNDARY_MARKER.Length;
                         }
-                        ParseMultipartForm(bodyStream, ctx.Request.ContentType.Substring(idx), Request.ContentEncoding ?? Encoding.UTF8);
+
+                        FormDataTask = MultipartForm.Read(ctx.Request.ContentType.Substring(idx), bodyStream, Request.ContentEncoding ?? Encoding.UTF8, "multipart");
                     }
                     else
                     {
@@ -542,6 +500,8 @@ namespace HttpServer.WebServer
             {
                 ResponseCode = HttpStatusCode.NoContent;
             }
+
+            _FormData?.Clear();
         }
 
         /// <inheritdoc />

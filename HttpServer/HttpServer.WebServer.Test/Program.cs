@@ -150,9 +150,9 @@ namespace HttpServer.WebServer.Test
         }
 
         [ControllerEndpoint(HttpPost, "/controller/multipart")]
-        public void MultipartForm()
+        public async void MultipartFormAsync()
         {
-            Console.WriteLine(GetFormData("dsaffsd").ToString());
+            Console.WriteLine(await GetMultipartFormString("dsaffsd"));
         }
 
         [ControllerEndpoint(HttpGet, "/controller/upload")]
@@ -162,11 +162,11 @@ namespace HttpServer.WebServer.Test
         }
 
         [ControllerEndpoint(HttpPost, "/controller/upload")]
-        public void UploadFile()
+        public async void UploadFileAsync(string fileName)
         {
-            var formData = GetFormData("filename");
-            var file = File.Open(formData.FileName, FileMode.OpenOrCreate);
-            file.Write(formData.Content, 0, formData.Content.Length);
+            byte[] formData = await GetMultipartFormBuffer("filename");
+            var file = File.Open(fileName, FileMode.OpenOrCreate);
+            file.Write(formData, 0, formData.Length);
             file.Close();
         }
     }

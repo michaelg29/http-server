@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HttpServer.WebServer.Content;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -67,11 +68,19 @@ namespace HttpServer.WebServer
             return _server.TryGetVariable(name, out variable);
         }
 
-        protected MultipartFormData GetFormData(string name)
+        public async Task<MultipartFormData> GetMultipartFormData(string name)
         {
-            return _server.FormDataContent
-                .Where(c => c.Name == name)
-                .FirstOrDefault();
+            return await _server.GetMultipartFormData(name);
+        }
+
+        public async Task<byte[]> GetMultipartFormBuffer(string name)
+        {
+            return await _server.GetMultipartFormBuffer(name);
+        }
+
+        public async Task<string> GetMultipartFormString(string name)
+        {
+            return await _server.GetMultipartFormString(name);
         }
     }
 }
