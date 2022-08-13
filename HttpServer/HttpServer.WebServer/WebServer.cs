@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace HttpServer.WebServer
 {
@@ -352,8 +353,13 @@ namespace HttpServer.WebServer
             byte[] buffer = null;
             var form = await GetMultipartForm();
 
-            FileStream file = File.OpenRead(form.DataFile);
             var formData = form.Data.Where(d => d.Name == name).FirstOrDefault();
+            if (formData == null)
+            {
+                return null;
+            }
+
+            FileStream file = File.OpenRead(form.DataFile);
             file.Seek(formData.StartIdx, SeekOrigin.Begin);
             buffer = new byte[formData.Length];
             await file.ReadAsync(buffer, 0, formData.Length);
@@ -367,8 +373,13 @@ namespace HttpServer.WebServer
             byte[] buffer = null;
             var form = await GetMultipartForm();
 
-            FileStream file = File.OpenRead(form.DataFile);
             var formData = form.Data.Where(d => d.Name == name).FirstOrDefault();
+            if (formData == null)
+            {
+                return null;
+            }
+
+            FileStream file = File.OpenRead(form.DataFile);
             file.Seek(formData.StartIdx, SeekOrigin.Begin);
             buffer = new byte[formData.Length];
             await file.ReadAsync(buffer, 0, formData.Length);
@@ -391,9 +402,10 @@ namespace HttpServer.WebServer
                 // read body stream
                 var bodyStream = ctx.Request.InputStream;
                 string bodyStr = null;
+                byte[] bodyBuffer = null;
                 IDictionary<string, string> formParams = null;
 
-                if (bodyStream != null)
+                if (bodyStream != null && !string.IsNullOrEmpty(ctx.Request.ContentType))
                 {
                     // parse body stream
                     Console.WriteLine(ctx.Request.ContentType);
@@ -408,8 +420,9 @@ namespace HttpServer.WebServer
 
                         FormDataTask = MultipartForm.Read(ctx.Request.ContentType.Substring(idx), bodyStream, Request.ContentEncoding ?? Encoding.UTF8, "multipart");
                     }
-                    else
+                    else if (Mime.TextMimeTypes.Any(s => Regex.Match(ctx.Request.ContentType, s).Success))
                     {
+                        // read as text
                         var body = new StringBuilder();
                         byte[] buffer = new byte[1024];
                         int noBytes;
@@ -424,16 +437,33 @@ namespace HttpServer.WebServer
                         {
                             formParams = body.ToString().ParseAsQuery();
                         }
-                        else if (ctx.Request.ContentType?.Contains("text") == true)
+                        else
                         {
                             bodyStr = body.ToString();
                         }
+                    }
+                    else
+                    {
+                        // read as buffer
+                        List<byte> bytes = new List<byte>();
+                        byte[] buffer = new byte[1024];
+                        int noBytes;
+                        while ((noBytes = bodyStream.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            int diff = buffer.Length - noBytes;
+                            bytes.AddRange(buffer);
+                            if (diff > 0)
+                            {
+                                bytes.RemoveRange(bytes.Count - diff, diff);
+                            }
+                        }
+                        bodyBuffer = bytes.ToArray();
                     }
                 }
 
                 // call function with endpoint
                 res = await RouteTree.TryNavigate(new HttpMethod(ctx.Request.HttpMethod),
-                    ctx.Request.RawUrl, bodyStr, formParams);
+                    ctx.Request.RawUrl, bodyStr, bodyBuffer, formParams);
                 if (res.Item1)
                 {
                     retObj = res.Item2;
@@ -444,6 +474,13 @@ namespace HttpServer.WebServer
                     ResponseCode = HttpStatusCode.NotFound;
                     retObj = HandleNotFound(out retType);
                 }
+            }
+            catch (System.Reflection.TargetParameterCountException e)
+            {
+                // could not find corresponding method
+                ResponseCode = HttpStatusCode.NotFound;
+                logger.Send(e);
+                retObj = HandleNotFound(out retType);
             }
             catch (HttpListenerException e)
             {
@@ -501,7 +538,7 @@ namespace HttpServer.WebServer
                 ResponseCode = HttpStatusCode.NoContent;
             }
 
-            _FormData?.Clear();
+            (await GetMultipartForm())?.Clear();
         }
 
         /// <inheritdoc />

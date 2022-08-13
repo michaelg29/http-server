@@ -8,6 +8,14 @@ namespace HttpServer
     /// </summary>
     public static class Mime
     {
+        public static readonly IList<string> TextMimeTypes = new List<string>
+        {
+            @"text\/*",
+            "application/x-javascript",
+            "application/json",
+            "application/x-www-form-urlencoded"
+        };
+
         /// <summary>
         /// dictionary mapping file extension to MIME type
         /// </summary>
@@ -43,6 +51,7 @@ namespace HttpServer
             { ".jpeg", "image/jpeg" },
             { ".jpg", "image/jpeg" },
             { ".js", "application/x-javascript" },
+            { ".json", "applicaation/json" },
             { ".mml", "text/mathml" },
             { ".mng", "video/x-mng" },
             { ".mov", "video/quicktime" },

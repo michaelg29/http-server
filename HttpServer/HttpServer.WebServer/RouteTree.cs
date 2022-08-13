@@ -368,7 +368,7 @@ namespace HttpServer.WebServer
         /// <param name="route">The route</param>
         /// <param name="body">The request body</param>
         /// <returns>(Whether the action was found, returned object, return type)</returns>
-        public async Task<(bool, object, Type)> TryNavigate(HttpMethod method, string route, string body = null, IDictionary<string, string> extraParams = null)
+        public async Task<(bool, object, Type)> TryNavigate(HttpMethod method, string route, string body = null, byte[] bodyBuffer = null, IDictionary<string, string> extraParams = null)
         {
             if (root == null)
             {
@@ -437,6 +437,12 @@ namespace HttpServer.WebServer
                 IList<object> argsList = new List<object>();
                 foreach (var param in function.MethodInfo.GetParameters())
                 {
+                    if (param.ParameterType == typeof(byte[]))
+                    {
+                        argsList.Add(bodyBuffer);
+                        continue;
+                    }
+
                     if (routeArgs.TryGetValue(param.Name, out object value))
                     {
                         // found from route
@@ -470,7 +476,9 @@ namespace HttpServer.WebServer
                         catch { }
                     }
 
-                    argsList.Add(null);
+                    argsList.Add(param.HasDefaultValue
+                        ? param.DefaultValue
+                        : null);
                 }
 
                 // call function

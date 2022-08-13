@@ -161,13 +161,31 @@ namespace HttpServer.WebServer.Test
             return new View("file.html");
         }
 
-        [ControllerEndpoint(HttpPost, "/controller/upload")]
-        public async void UploadFileAsync(string fileName)
+        [ControllerEndpoint(HttpPost, "/controller/print")]
+        public async void PrintFormValsAsync()
         {
-            byte[] formData = await GetMultipartFormBuffer("filename");
-            var file = File.Open(fileName, FileMode.OpenOrCreate);
-            file.Write(formData, 0, formData.Length);
-            file.Close();
+            string[] keys = new string[]
+            {
+                "filename",
+                "key1",
+                "key13",
+                "hello_to_you",
+                "multipart_val_3",
+                "long"
+            };
+            foreach (string key in keys)
+            {
+                Console.WriteLine($"{key} => {await GetMultipartFormString(key)}");
+            }
+        }
+
+        [ControllerEndpoint(HttpPost, "/controller/upload")]
+        public async void UploadBuffer(string filename, byte[] data)
+        {
+            FileStream f = File.OpenWrite(filename);
+            f.Write(data, 0, data.Length);
+            f.Close();
+            SetResponse(responseCode: HttpStatusCode.OK);
         }
     }
 

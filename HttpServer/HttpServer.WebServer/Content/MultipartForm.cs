@@ -67,7 +67,7 @@ namespace HttpServer.WebServer.Content
             // update cursor
             Head = (Head + length) % Size;
 
-            OccupiedSize += noBytesRead;
+            OccupiedSize = Math.Min(OccupiedSize + noBytesRead, Size);
             return noBytesRead;
         }
 
@@ -92,7 +92,7 @@ namespace HttpServer.WebServer.Content
             {
                 endIdx = Data.Length;
             }
-            int upperBound = endIdx - startIdx - target.Length;
+            int upperBound = endIdx - target.Length;
             for (int _i = startIdx; _i < upperBound; _i++)
             {
                 int skip = 0;
@@ -232,8 +232,8 @@ namespace HttpServer.WebServer.Content
             // read body
             if (bytes.TryIndexOf(bodySepBytes, out int bodyStartIdx, startIdx, endIdx))
             {
-                output.StartIdx = bodyStartIdx + bodySepBytes.Length;
-                output.Length = 0;
+                output.StartIdx += bodyStartIdx + bodySepBytes.Length;
+                output.Length = endIdx - (bodyStartIdx + bodySepBytes.Length);
             }
         }
 
@@ -261,9 +261,9 @@ namespace HttpServer.WebServer.Content
             // read stream in 1/2 kb increments
             int length = 1 << 9;
             // store consecutive blocks to read edges
-            ByteQueue queue = new ByteQueue(length * 2);
+            ByteQueue queue = new ByteQueue(length << 1);
 
-            int idx = 0;
+            int idx;
             int noBytes;
             int startIdx = -1;
             int fileCursor = 0;
@@ -272,49 +272,49 @@ namespace HttpServer.WebServer.Content
             {
                 while ((idx = queue.IndexOf(boundaryBytes, Math.Max(startIdx, 0))) > -1)
                 {
-                    if (startIdx > -1)
+                    if (curData != null)
                     {
                         // read into element
                         if (curData.Length == 0)
                         {
                             // have not yet parsed
-                            ParseMultipartFormData(queue, startIdx, idx > -1 ? idx : queue.Size, encoding, curData);
+                            ParseMultipartFormData(queue, startIdx, idx > -1 ? idx : queue.OccupiedSize, encoding, curData);
+                        }
+                        else
+                        {
+                            // found end
+                            curData.Length = fileCursor + (idx % length) - curData.StartIdx;
                         }
 
-                        // found end
-                        curData.Length += idx - curData.StartIdx - 2;
+                        curData.Length -= 2;
                         multipartForm.Data.Add(curData);
-                        curData = null;
+                    }
 
-                        // prepare to read next form element
-                        startIdx = idx + boundaryLength;
-                    }
-                    else
+                    // found start
+                    startIdx = idx + boundaryLength;
+                    curData = new MultipartFormData
                     {
-                        // found start
-                        startIdx = idx + boundaryLength;
-                        curData = new MultipartFormData();
-                    }
+                        StartIdx = fileCursor > (length << 1) ? fileCursor : 0
+                    };
                 }
                 if (curData != null)
                 {
-                    if (curData.StartIdx == 0)
+                    if (curData.Length == 0)
                     {
                         // read into element
-                        ParseMultipartFormData(queue, startIdx, idx > -1 ? idx : queue.Size, encoding, curData);
+                        ParseMultipartFormData(queue, startIdx, queue.OccupiedSize, encoding, curData);
                     }
                     else
                     {
                         // increase body size
-                        curData.ContentLength += idx == -1 ?
-                            length : idx;
+                        curData.ContentLength += length - idx;
                     }
                 }
 
-                startIdx = 0;
                 fileCursor += noBytes;
+                startIdx = 512;
             }
-
+            file.Close();
             return multipartForm;
         }
         
