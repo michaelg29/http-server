@@ -193,59 +193,6 @@ namespace HttpServer.WebServer.Test
     {
         static WebServer ws;
 
-        static void Action_()
-        {
-            Console.WriteLine("Action_");
-        }
-
-        static void Action_Hello()
-        {
-            Console.WriteLine("Action_Hello");
-        }
-
-        static void Action_int(int num)
-        {
-            Console.WriteLine($"Action_int: {num}");
-        }
-
-        static void Action_hello_test_int_str(int num, string str)
-        {
-            Console.WriteLine($"Action_hello_test_int_str: {num}, {str}");
-        }
-
-        static async void Action_hello_query(string name, int age)
-        {
-            await ws.SendStringAsync($"Hello, {name}, with age {age}");
-        }
-
-        static async Task<TestClassGreeting> Action_body(string name, int age, int grade, string home)
-        {
-            return await Task.FromResult(Action_greet(name, age, grade, home));
-        }
-
-        static TestClassGreeting Action_greet(string name, int age, int grade, string home)
-        {
-            return new TestClassGreeting
-            {
-                Greeting = $"Hello, {name} ({age}), welcome to grade {grade}, I hope the journey from {home} wasn't too difficult."
-            };
-        }
-
-        static async Task<TestClassGreeting> Action_body(TestClass testClass)
-        {
-            return await Action_body(testClass.Name, testClass.Age, testClass.Grade, testClass.Home);
-        }
-
-        static async Task<int> Action_increment(int a, int b)
-        {
-            return await Task.FromResult(a + b);
-        }
-
-        static int Action_subtract(int a, int b)
-        {
-            return a - b;
-        }
-
         static string ExceptionHandler(HttpListenerContext context, Exception e, IConfigurationStore config)
         {
             return new Message(e)
@@ -269,17 +216,6 @@ namespace HttpServer.WebServer.Test
             ws.RegisterVariable("name", "Web server test");
             ws.RegisterVariable("version", Version.V1_0);
             ws.RegisterVariable("date", DateTime.UtcNow);
-
-            ws.RouteTree.AddRoute(Get, "/", Action_);
-            ws.RouteTree.AddRoute(Get, "/hello", Action_Hello);
-            ws.RouteTree.AddRoute<int>(Get, "/{num:int}", Action_int);
-            ws.RouteTree.AddRoute<int, string>(Get, "/hello/test/{num:int}/{str}", Action_hello_test_int_str);
-            ws.RouteTree.AddRoute<string, int>(Get, "/hello/query", Action_hello_query);
-            ws.RouteTree.AddRoute<TestClass>(Get, "/greetjson", Action_body);
-            ws.RouteTree.AddRoute<string, int, int, string>(Get, "/greetasync", Action_body);
-            ws.RouteTree.AddRoute<string, int, int, string, TestClassGreeting>(Get, "/greet", Action_greet);
-            ws.RouteTree.AddRoute<int, int>(Get, "/increment", Action_increment);
-            ws.RouteTree.AddRoute<int, int, int>(Get, "/subtract", Action_subtract);
 
             ws.RegisterService<IService, Service>();
             ws.RegisterController<ControllerTest>();
