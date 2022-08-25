@@ -51,7 +51,7 @@ namespace HttpServer
             { ".jpeg", "image/jpeg" },
             { ".jpg", "image/jpeg" },
             { ".js", "application/x-javascript" },
-            { ".json", "applicaation/json" },
+            { ".json", "application/json" },
             { ".mml", "text/mathml" },
             { ".mng", "video/x-mng" },
             { ".mov", "video/quicktime" },
