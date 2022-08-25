@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer.WebServer.Test",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer.WebServer.Client.Test", "HttpServer.WebServer.Client.Test\HttpServer.WebServer.Client.Test.csproj", "{5F0631E7-E96A-4C59-B215-C0C7AA5944BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer.Yt.WebServer", "HttpServer.Yt.WebServer\HttpServer.Yt.WebServer.csproj", "{4E2D3B41-D0B6-4A34-8FF9-B79D41316AE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer.Yt.WebServer.Test", "HttpServer.Yt.WebServer.Test\HttpServer.Yt.WebServer.Test.csproj", "{ABF117D9-07C2-4E4F-9606-943D29C865BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,14 @@ Global
 		{5F0631E7-E96A-4C59-B215-C0C7AA5944BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F0631E7-E96A-4C59-B215-C0C7AA5944BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F0631E7-E96A-4C59-B215-C0C7AA5944BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E2D3B41-D0B6-4A34-8FF9-B79D41316AE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E2D3B41-D0B6-4A34-8FF9-B79D41316AE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E2D3B41-D0B6-4A34-8FF9-B79D41316AE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E2D3B41-D0B6-4A34-8FF9-B79D41316AE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABF117D9-07C2-4E4F-9606-943D29C865BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABF117D9-07C2-4E4F-9606-943D29C865BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABF117D9-07C2-4E4F-9606-943D29C865BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABF117D9-07C2-4E4F-9606-943D29C865BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
