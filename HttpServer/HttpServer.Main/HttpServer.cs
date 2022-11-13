@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -365,6 +366,22 @@ namespace HttpServer.Main
             {
                 // do not start again
                 return 1;
+            }
+
+            if (!System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable())
+            {
+                throw new Exception("No network available");
+            }
+
+            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+
+            var ips = host
+                .AddressList
+                .Where(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+            Console.WriteLine("Local IP Addresses:");
+            foreach (var ip in ips)
+            {
+                Console.WriteLine(ip.ToString());
             }
 
             try
