@@ -397,6 +397,8 @@ namespace HttpServer.WebServer
             object retObj = null;
             Type retType = null;
 
+            ResponseCode = HttpStatusCode.OK;
+
             try
             {
                 // read body stream
@@ -431,8 +433,6 @@ namespace HttpServer.WebServer
                             body = body.Append((Request.ContentEncoding ?? Encoding.UTF8).GetString(buffer, 0, noBytes));
                         }
 
-                        Console.WriteLine(body.ToString());
-
                         if (ctx.Request.ContentType == "application/x-www-form-urlencoded")
                         {
                             formParams = body.ToString().ParseAsQuery();
@@ -440,6 +440,7 @@ namespace HttpServer.WebServer
                         else
                         {
                             bodyStr = body.ToString();
+                            bodyBuffer = (Request.ContentEncoding ?? Encoding.UTF8).GetBytes(body.ToString());
                         }
                     }
                     else
@@ -507,7 +508,6 @@ namespace HttpServer.WebServer
             if (!(retObj == null || retType == null))
             {
                 // send returned content
-                ResponseCode = HttpStatusCode.OK;
                 if (retType.IsPrimitive || primitiveTypes.Contains(retType))
                 {
                     await SendStringAsync(retObj.ToString(), ctx.Response.ContentType ?? "text");
