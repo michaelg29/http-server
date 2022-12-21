@@ -370,7 +370,7 @@ namespace HttpServer.Main
 
             if (!System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable())
             {
-                throw new Exception("No network available");
+                logger.Send("No network available");
             }
 
             IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
@@ -378,11 +378,7 @@ namespace HttpServer.Main
             var ips = host
                 .AddressList
                 .Where(ip => ip.AddressFamily == AddressFamily.InterNetwork);
-            Console.WriteLine("Local IP Addresses:");
-            foreach (var ip in ips)
-            {
-                Console.WriteLine(ip.ToString());
-            }
+            logger.Send(new Message("Hosting addresses").With("List", string.Join(", ", ips)));
 
             try
             {
