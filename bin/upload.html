@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Upload file</title>
+</head>
+
+<body>
+    <h1>Upload file</h1>
+    
+    <script>
+        function upload() {{
+            let files = document.querySelector("#file-input").files;
+            for (let i = 0; i < files.length; ++i) {{
+                const file = files[i];
+
+                const reader = new FileReader();
+                reader.onload = (e) => {{
+                    console.log("sending file " + file.name);
+                    const request = new XMLHttpRequest();
+                    request.open("POST", "{0}?name=" + file.name);
+                    request.setRequestHeader("Content-Type", "application/octet-stream");
+                    request.send(e.target.result);
+                }};
+                reader.readAsArrayBuffer(file);
+            }}
+        }}
+    </script>
+
+    <input type="file" id="file-input" multiple />
+    <input type="button" id="file-submit" onclick="upload()" value="Upload file(s)" />
+</body>
+
+</html>
