@@ -43,7 +43,7 @@ namespace HttpServer.Main
         /// <returns>The absolute path</returns>
         protected string GetTemplatePath(string path)
         {
-            return $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}/{path}";
+            return $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location).Replace('\\', '/')}/{path}";
         }
 
         /// <summary>

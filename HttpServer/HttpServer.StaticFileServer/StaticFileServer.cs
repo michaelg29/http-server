@@ -35,12 +35,13 @@ namespace HttpServer.StaticFileServer
         protected override async Task Startup()
         {
             // create upload directory
-            Directory.CreateDirectory(GetTemplatePath(uploadDirectory));
+            Directory.CreateDirectory(uploadDirectory);
+            Console.WriteLine($"Created directory {AbsolutePath(uploadDirectory)}");
 
             // amend upload request path if needed
             uploadRequestRoute = "/upload";
             int i = 0;
-            while (Directory.Exists(GetTemplatePath(uploadRequestRoute)))
+            while (Directory.Exists(uploadRequestRoute))
             {
                 uploadRequestRoute = $"/upload{i}";
                 ++i;
