@@ -15,6 +15,7 @@ namespace HttpServer.StaticFileServer
 
             string hostUrl = "http://+:8080/";
             string hostDir = string.Empty;
+            bool allowUpload = false;
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -33,9 +34,14 @@ namespace HttpServer.StaticFileServer
                         hostDir = value;
                     }
                 }
+
+                if (args[i] == "-p")
+                {
+                    allowUpload = true;
+                }
             }
 
-            StaticFileServer server = new StaticFileServer(hostUrl, hostDir, Logger.ConsoleLogger);
+            StaticFileServer server = new StaticFileServer(hostUrl, hostDir, allowUpload, Logger.ConsoleLogger);
             int res = await server.RunAsync();
 
             Console.WriteLine($"Ended with code {res}, press any key to continue...");

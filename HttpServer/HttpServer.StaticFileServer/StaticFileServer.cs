@@ -24,29 +24,36 @@ namespace HttpServer.StaticFileServer
         protected string dirPath = "directory.html";
         protected string uploadPath = "upload.html";
 
+        protected bool allowUpload = false;
         protected string uploadDirectory = "uploadbin";
         protected string uploadRequestRoute;
 
         /// <inheritdoc />
-        public StaticFileServer(string hostUrl = null, string hostDir = null, ILogger logger = null)
-            : base(hostUrl, hostDir, logger) { }
+        public StaticFileServer(string hostUrl = null, string hostDir = null, bool allowUpload = false, ILogger logger = null)
+            : base(hostUrl, hostDir, logger)
+        {
+            this.allowUpload = allowUpload;
+        }
 
         /// <inheritdoc />
         protected override async Task Startup()
         {
-            // create upload directory
-            Directory.CreateDirectory(uploadDirectory);
-            Console.WriteLine($"Created directory {AbsolutePath(uploadDirectory)}");
-
-            // amend upload request path if needed
-            uploadRequestRoute = "/upload";
-            int i = 0;
-            while (Directory.Exists(uploadRequestRoute))
+            if (allowUpload)
             {
-                uploadRequestRoute = $"/upload{i}";
-                ++i;
+                // create upload directory
+                Directory.CreateDirectory(uploadDirectory);
+                Console.WriteLine($"Created directory {AbsolutePath(uploadDirectory)}");
+
+                // amend upload request path if needed
+                uploadRequestRoute = "/upload";
+                int i = 0;
+                while (Directory.Exists(uploadRequestRoute))
+                {
+                    uploadRequestRoute = $"/upload{i}";
+                    ++i;
+                }
+                logger.Send($"Access the upload form at the route {uploadRequestRoute}");
             }
-            logger.Send($"Access the upload form at the route {uploadRequestRoute}");
         }
 
         /// <summary>
@@ -117,9 +124,9 @@ namespace HttpServer.StaticFileServer
 
                     // send formatted file
                     await _SendFileAsync(GetTemplatePath(dirPath),
-                        route, directoryList, fileList, uploadRequestRoute);
+                        route, directoryList, fileList, allowUpload ? uploadRequestRoute : "");
                 }
-                else if (route == uploadRequestRoute)
+                else if (allowUpload && route == uploadRequestRoute)
                 {
                     if (ctx.Request.HttpMethod == "POST")
                     {
