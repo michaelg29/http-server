@@ -425,7 +425,7 @@ namespace HttpServer.Main
 
                 switch (cmd)
                 {
-                    case "quit":
+                    case "exit":
                         running = false;
                         break;
                     default:
