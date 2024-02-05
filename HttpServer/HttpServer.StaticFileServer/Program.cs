@@ -13,7 +13,7 @@ namespace HttpServer.StaticFileServer
         {
             Console.WriteLine("Hello, world!");
 
-            string hostUrl = "http://+:8080/";
+            string hostUrl = "http://+:8080/;https://+:8443";
             string hostDir = string.Empty;
             bool allowUpload = false;
 

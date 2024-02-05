@@ -119,7 +119,7 @@ namespace HttpServer.StaticFileServer
                         {
                             int idx = Math.Max(s.LastIndexOf('/'), s.LastIndexOf('\\'));
                             string relPath = s.Substring(idx + 1);
-                            return $"\n\t\t<ul><a href=\"{route}{relPath}\">{relPath}</a> <a href=\"{route}{relPath}\" download>Download</a></ul>";
+                            return $"\n\t\t<ul><a href=\"{route}{relPath}\" target=\"blank\">{relPath}</a> <a href=\"{route}{relPath}\" target=\"blank\" download>Download</a></ul>";
                         }));
 
                     // send formatted file
