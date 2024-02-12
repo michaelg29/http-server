@@ -42,7 +42,7 @@ namespace HttpServer.StaticFileServer
                     i += 1;
                 }
 
-                if (args[i] == "-s" || args[i] == "-https")
+                if (args[i] == "-s" || args[i] == "--https")
                 {
                     https = true;
                 }
