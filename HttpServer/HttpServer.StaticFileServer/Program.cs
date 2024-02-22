@@ -28,18 +28,14 @@ namespace HttpServer.StaticFileServer
                     if (args[i] == "-d" || args[i] == "--dir")
                     {
                         hostDir = value;
+                        i += 1;
                     }
                     else if (args[i] == "-p" || args[i] == "--pass")
                     {
                         https = true;
                         passcode = value;
+                        i += 1;
                     }
-                    else
-                    {
-                        continue;
-                    }
-
-                    i += 1;
                 }
 
                 if (args[i] == "-s" || args[i] == "--https")
